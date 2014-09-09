@@ -23,6 +23,7 @@ date_pre
 date
 reldate
 number
+number_clean
 address
 url_pre
 url
