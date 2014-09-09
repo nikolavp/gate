@@ -1,0 +1,28 @@
+ <project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>uk.ac.gate</groupId>
+  <artifactId>gate-asm</artifactId>
+  <packaging>jar</packaging>
+  <name>Repackaged version of ASM 3.1 for GATE</name>
+  <version>3.1</version>
+  <description>The ASM 3.1 library with packages renamed.</description>
+  <url>http://gate.ac.uk</url>
+  <scm>
+    <url>http://gate.svn.sourceforge.net/viewvc/gate/gate</url>
+    <connection>http://gate.svn.sourceforge.net/viewvc/gate/gate</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>gate-team</id>
+      <name>GATE Team</name>
+      <email>gate-developers@lists.sourceforge.net</email>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <name>INRIA copyright</name>
+      <url>http://asm.ow2.org/license.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+</project>

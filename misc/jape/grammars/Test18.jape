@@ -1,0 +1,22 @@
+Multiphase: SpacesExample
+
+Phase: FindTheSections
+
+Rule: BreakingSpaces
+(
+  {SpaceToken.kind == "break"}
+):break
+-->
+:break.Token = { orth = "break" }
+
+
+Phase: NameTest
+
+Rule: InitCaps
+(
+  {Token.orth == "initCap"} 
+  |
+  {Token.orth == "allCaps"}
+)+ :name
+-->
+:name.Name = { kind = "name" }

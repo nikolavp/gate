@@ -1,0 +1,44 @@
+// Dates.jape
+
+Phase:	DateRules
+Options: control = appelt
+
+
+Macro: ORDINAL
+(
+  {Token.kind == "num"}
+  (
+    {Token.string == "TH"} | {Token.string == "th"} | {Token.string == "RD"} |
+    {Token.string == "rd"} | {Token.string == "ND"} | {Token.string == "nd"} |
+    {Token.string == "ST"} | {Token.string == "st"}
+  )
+):ordinalBase
+
+
+Rule:	DateOrdinal
+(
+  {Lookup.minorType == "MONTH"}
+  ORDINAL
+):dateName
+-->
+:dateName.Name = {kind = "date", rule = "DateOrdinal"},
+:ordinalBase.Ordinal = {rule = "DateOrdinal"}
+
+Rule:	OrdinalDate
+(
+  ORDINAL
+/*
+  (
+    {Token.kind == "num"}
+    (
+      {Token.string == "TH"} | {Token.string == "th"} | {Token.string == "RD"} |
+      {Token.string == "rd"} | {Token.string == "ND"} | {Token.string == "nd"} |
+      {Token.string == "ST"} | {Token.string == "st"}
+    )
+  ):ordinalBase
+*/
+  {Token.annotType == "Token", Lookup.minorType == "MONTH"}
+):dateName
+-->
+:dateName.Name = {kind = "date", rule = "OrdinalDate"},
+:ordinalBase.Ordinal = {rule = "OrdinalDate"}

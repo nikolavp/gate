@@ -1,0 +1,14 @@
+// Test13.jape
+// Hamish 22/9/98
+// $Id$
+
+Phase:	PhaseTest13
+
+Rule:	SillyPersonName
+(
+  {Lookup.majorType == "CDG"}
+  {! Lookup.majorType == "CDG"}
+  {Token.orth == "initCap"}
+):personName
+-->
+:+personName.Name = {kind = "person", rule = "SillyPersonName"}

@@ -1,0 +1,49 @@
+// Test19
+
+Multiphase: SpacesExample
+
+Phase: LookupInitcapPhase
+
+/*
+Macro: TITLE0
+( ( ({Token, Lookup.majorType == "TITLE"})+ ) )
+
+Macro: TITLE1
+( {Lookup.majorType == "TITLE"}
+  {Lookup.majorType == "TITLE"} )
+
+Rule: LookupInitcap
+(
+  TITLE0
+  (
+    {Token.orth == "initCap"} 
+    |
+    {Token.orth == "allCaps"}
+  )+
+):name
+-->
+:name.Name = { rule = "LookupInitcap" }
+*/
+
+
+Macro: TITLE0
+(
+  ( {Token, Lookup.majorType == "TITLE"} )+
+  {Token.string == "of"}
+  {Token}
+)
+
+Macro: TITLE1
+({Token, Lookup.majorType == "TITLE"})+
+
+Rule: LookupInitcap
+(
+  ( TITLE0 | TITLE1 )
+  (
+    {Token.orth == "initCap"} 
+    |
+    {Token.orth == "allCaps"}
+  )*
+):name
+-->
+:name.Name = { rule = "LookupInitcap" }

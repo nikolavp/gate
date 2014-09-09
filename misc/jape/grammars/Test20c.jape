@@ -1,0 +1,15 @@
+// Test20c
+
+Phase: Test20c
+
+Rule: LookupInitcap
+(
+  ( TITLE0 | TITLE1 )
+  (
+    {Token.orth == "initCap"} 
+    |
+    {Token.orth == "allCaps"}
+  )*
+):name
+-->
+:name.Name = { rule = "LookupInitcap" }

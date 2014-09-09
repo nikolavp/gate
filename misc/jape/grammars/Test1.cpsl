@@ -1,0 +1,24 @@
+
+;; Test1.cpsl
+;; ugh - lisp-style comments :-)
+;; 
+;; Hamish, 8/7/98
+;;
+;; $Id$
+
+
+Phase:	Test1
+Input:	Token
+
+
+Rule:	KiloAmount
+
+  (
+    ( {Token.kind == "containsDigitAndComma"} ):number
+    {Token.string == "kilograms"}
+  ):whole
+
+-->
+
+  :whole.Name = { kind = "KiloAmount" },
+  :whole.Name = { amount = :number.Token.string }

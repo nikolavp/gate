@@ -1,0 +1,40 @@
+
+
+
+    // Test16.jape
+    // Chasing macros bug triggered by appelt control
+    // Hamish, 24.9.98
+    // $Id$
+
+    Phase:	Test16
+    // Options: control = brill
+    Options: control = appelt
+
+
+    Macro: NUM
+    (
+      {Token.kind == "num"}
+    ):numBase
+
+
+    Rule:	Num1
+    (
+      {Token.string == "a"}
+      // (
+      // {Token.kind == "num"}
+      // ):numBase
+      NUM
+    ):num
+    -->
+    // :numBase.NumBase = {rule = "1"},
+    :num.Num = {rule = "1"}
+
+
+    Rule:	Num2
+    (
+      NUM
+      {Token.string == "a"}
+    ):num
+    -->
+    // :numBase.NumBase = {rule = "2"},
+    :num.Num = {rule = "2"}

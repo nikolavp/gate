@@ -1,0 +1,76 @@
+
+// example.jape
+// 
+// Hamish, 24/7/98
+//
+// $Id$
+
+
+Phase:	ExamplePhase
+Input:	Token
+
+
+// match a sequence of all caps tokens and put a LotsOfCaps annotation
+// above it
+Rule:	AllCaps
+( {Token.kind == "allCaps"} )+ :capsList
+
+-->
+
+:capsList{
+
+  doc.addAnnotation(
+    "LotsOfCaps",
+    capsListAnnots.getLeftmostStart(),
+    capsListAnnots.getRightmostEnd(),
+    "how hum",
+    "twiddlee dee"
+  );
+
+} // capsList
+
+
+// match a sequence of integers, and store their sum
+Rule: 	NumberSum
+
+( {Token.kind == "otherNum"} )+ :numberList
+
+-->
+
+:numberList{
+  // the running total
+  int theSum = 0;
+
+  // loop round all the annotations the LHS consumed
+  for(int i = 0; i<numberListAnnots.length(); i++) { /* this
+							is a
+							comment */ 
+  
+    // get the number string for this annot
+    String numberString = doc.spanStrings(numberListAnnots.nth(i));
+    Debug.pr(this, "adding " + numberString + " to sum");  
+
+    // parse the number string and add to running total
+    try {
+      theSum += Integer.parseInt(numberString);
+    } catch(NumberFormatException e) {
+      // ignore badly-formatted numbers
+    }
+  } // for each number annot
+  
+  Debug.pr(this, "numberListAnnots: " + numberListAnnots);  
+  Debug.pr(this, "theSum: " + theSum);  
+  Debug.pr(this, "numberListAnnots.getLeftmostStart( =  " +
+	   numberListAnnots.getLeftmostStart());  
+  Debug.pr(this, "numberListAnnots.getRightmostEnd( =  " +
+	   numberListAnnots.getRightmostEnd());  
+
+  doc.addAnnotation(
+    "Number",
+    numberListAnnots.getLeftmostStart(),
+    numberListAnnots.getRightmostEnd(),
+    "sum",
+    new Integer(theSum)
+  );
+
+} // :numberList

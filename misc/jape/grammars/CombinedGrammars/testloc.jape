@@ -1,0 +1,10 @@
+// testloc.jape
+
+MultiPhase:	TestLocationGrammars
+Phases:
+  brian-default
+  brian-loc-region1
+  brian-loc1
+  brian-soc-loc1
+  brian-loc-final
+

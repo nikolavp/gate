@@ -1,0 +1,68 @@
+// Test8.jape
+//
+// Test Appelt style rule application
+// Hamish, 16/9/98
+//
+// $Id$
+
+
+Phase:	LeftBollock
+Options: control = appelt
+
+
+// this rule is higher priority and earlier position than the next, but
+// should never match instead if the next, under appelt style application
+
+Rule:	RightBollock1
+Priority: 10
+
+  (
+    ({Token.orth == "lowerCase"}):first
+    ({Token.orth == "lowerCase"}):second
+    ({Token.orth == "lowerCase"}):third
+  ):whole
+
+-->
+
+:third{
+},
+
+:whole{
+
+  doc.addAnnotation(
+    "_ThreeLowers",
+    thirdAnnots.getLeftmostStart(), 
+    thirdAnnots.getRightmostEnd(),
+    "spanStrings",
+    doc.spanStrings(wholeAnnots)
+  );
+  
+}
+
+
+Rule:	RightBollock2
+Priority: 1
+
+  (
+    ({Token.orth == "lowerCase"}):first
+    ({Token.orth == "lowerCase"}):second
+    ({Token.orth == "lowerCase"}):third
+    ({Token.orth == "lowerCase"}):fourth
+  ):whole
+
+-->
+
+:third{
+},
+
+:whole{
+
+  doc.addAnnotation(
+    "_FourLowers",
+    thirdAnnots.getLeftmostStart(), 
+    thirdAnnots.getRightmostEnd(),
+    "spanStrings",
+    doc.spanStrings(wholeAnnots)
+  );
+  
+}

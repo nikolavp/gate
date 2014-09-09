@@ -1,0 +1,142 @@
+// Test5.jape
+// $Id$
+
+Phase:	One
+Input:	Token
+
+Rule:	CountryTokenisedMoneyAmount
+  (
+      {Token.kind == "allCaps"} {Token.kind == "money"} 
+  ) :amount
+
+  -->
+
+  :amount{
+
+    doc.addAnnotation(
+      "Name",
+      amountAnnots.getLeftmostStart(),
+      amountAnnots.getRightmostEnd(),
+      "money",
+      "really big spender"
+    );
+
+  } // amount
+
+Rule:	RawTokenisedMoneyAmount
+    ( {Token.kind == "money"} ) :amount
+
+  -->
+
+  :amount{
+
+    doc.addAnnotation(
+      "Name",
+      amountAnnots.getLeftmostStart(),
+      amountAnnots.getRightmostEnd(),
+      "money",
+      "big spender"
+    );
+
+  } // amount
+
+
+Phase:	Two
+Input:	Token
+
+Rule:	KiloAmount
+
+  (
+    ( {Token.kind == "containsDigitAndComma"} ):number
+    {Token.string == "kilograms"}
+  ):whole
+
+-->
+
+  :whole.Name = { kind = "KiloAmount" },
+  :whole.Name = { amount = :number.Token.string }
+
+
+Phase:	Three
+Input:	Token
+
+// match a sequence of integers, and store their sum
+Rule: 	NumberSum
+
+( {Token.kind == "otherNum"} )+ :numberList
+
+-->
+
+:numberList{
+  // the running total
+  int theSum = 0;
+
+  // loop round all the annotations the LHS consumed
+  for(int i = 0; i<numberListAnnots.length(); i++) {
+  
+    // get the number string for this annot
+    String numberString = doc.spanStrings(numberListAnnots.nth(i));
+
+    // parse the number string and add to running total
+    try {
+      theSum += Integer.parseInt(numberString);
+    } catch(NumberFormatException e) {
+      // ignore badly-formatted numbers
+    }
+  } // for each number annot
+  
+  doc.addAnnotation(
+    "number",
+    numberListAnnots.getLeftmostStart(),
+    numberListAnnots.getRightmostEnd(),
+    "sum",
+    new Integer(theSum)
+  );
+
+} // :numberList
+
+
+Phase:	Four
+Input:	Token
+
+// match a sequence of all caps tokens and put a LotsOfCaps annotation
+// above it
+Rule:	AllCaps
+( {Token.kind == "allCaps"} )+ :capsList
+
+-->
+
+:capsList{
+
+  doc.addAnnotation(
+    "LotsOfCaps",
+    capsListAnnots.getLeftmostStart(),
+    capsListAnnots.getRightmostEnd(),
+    "how hum",
+    "twiddlee dee"
+  );
+
+} // capsList
+
+
+Phase:	Five
+
+// match a sequence of all caps tokens and put a LotsOfCaps annotation
+// above it
+Rule:	AllCaps
+( {lookup.majorType == "LOC_KEY", lookup.minorType == "LOC_KEY"} )+
+:locats
+
+-->
+
+:locats{
+
+  doc.addAnnotation(
+    "Locations",
+    locatsAnnots.getLeftmostStart(),
+    locatsAnnots.getRightmostEnd(),
+    "thing",
+    "otherthing"
+  );
+
+} // locats

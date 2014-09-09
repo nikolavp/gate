@@ -1,0 +1,40 @@
+// Test7.jape
+//
+// Test a long sequence of matches. Use e.g. AnotherJapeTestDoc.txt
+// Hamish, 14/9/98
+//
+// $Id$
+
+
+Phase:	FourLowersPhase
+Input:	Token
+
+/*
+ * FourLowers: regognise 4 lower case tokens. Annotate 3rd with
+ * spanStrings of all.
+ */
+Rule:	FourLowers
+
+  (
+    ({Token.kind == "lowerCase"}):first
+    ({Token.kind == "lowerCase"}):second
+    ({Token.kind == "lowerCase"}):third
+    ({Token.kind == "lowerCase"}):fourth
+  ):whole
+
+-->
+
+:third{
+},
+
+:whole{
+
+  doc.addAnnotation(
+    "FourLowers",
+    thirdAnnots.getLeftmostStart(), 
+    thirdAnnots.getRightmostEnd(),
+    "spanStrings",
+    doc.spanStrings(wholeAnnots)
+  );
+  
+}

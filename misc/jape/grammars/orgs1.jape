@@ -1,0 +1,32 @@
+// orgs1.jape
+// Brianm, 1/Sep/98
+
+Phase:	Orgs1
+Input:	Token
+
+Rule:	RawGazetteerEntry
+  (
+	(({Lookup.majorType == "ORGANISATION"}|{Lookup.majorType == "ORGANIZATION"})):orgName
+  )
+  -->
+
+  :orgName.Name = {kind = "organisation", rule = "RawGazetteerEntry"}
+
+Rule:	GazetteerEntryCdg
+  (
+	(({Lookup.majorType == "ORGANISATION"}|{Lookup.majorType == "ORGANIZATION"})
+         {Lookup.majorType == "CDG"}):orgName
+  )
+  -->
+
+  :orgName.Name = {kind = "organisation", rule = "GazetteerEntryCdg"}
+
+Rule:	InitCapsCdg
+  (
+	(({Token.orth == "initCap"})+
+         {Lookup.majorType == "CDG"}):orgName
+  )
+  -->
+
+  :orgName.Name = {kind = "organisation", rule = "InitCapsCdg"}
+

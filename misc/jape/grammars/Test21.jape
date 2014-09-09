@@ -1,0 +1,45 @@
+// Test21
+// Failed attempt to duplicate Sali's "OFFICER:" bug
+// Hamish, 17/10/98
+// $Id$
+
+Phase: Test21
+
+Rule: lowerPunc
+(
+  {Token, Lookup.majorType == "TITLE"}
+  {Token.kind == "punc"}
+  ( {Token.orth == "allCaps"} )+
+):item
+-->
+:item.New = { }
+
+
+/**** working thingy; intentionally complex macros
+Macro: TITLE1
+(
+  (
+    {Lookup.majorType == "TITLE"}
+    ( {Token.kind == "punc"} )
+  ):title0
+):title1
+
+Macro: TITLE2
+(
+  (
+    {Lookup.majorType == "TITLE"}
+    ( {Token.kind == "punc"} )
+  ):title2
+):title3
+
+Macro: TITLE3
+TITLE2 // gets us a "title3 already bound" warning, but still works
+
+Rule: lowerPunc
+(
+  ( TITLE3 | TITLE1 | TITLE2 ):title4
+  ( {Token.orth == "allCaps"} )+
+):item
+-->
+:item.New = { }
+****/

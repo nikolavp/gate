@@ -1,0 +1,30 @@
+
+    // parser strips off this:    :numberList{
+      // the running total
+      int theSum = 0;
+      // loop round all the annotations the LHS consumed
+      for(int i = 0; i<numberListAnnots.length(); i++) {
+  
+        // get the number string for this annot
+        String numberString = doc.spanStrings(numberListAnnots.nth(i));
+Debug.pr(this, "adding " + numberString + " to sum");  
+        // parse the number string and add to running total
+        try {
+          theSum += Integer.parseInt(numberString);
+        } catch(NumberFormatException e) {
+          // ignore badly-formatted numbers
+        }
+      } // for each number annot
+  
+Debug.pr(this, "numberListAnnots: " + numberListAnnots);  
+Debug.pr(this, "theSum: " + theSum);  
+Debug.pr(this, "numberListAnnots.getLeftmostStart( =  " + numberListAnnots.getLeftmostStart());  
+Debug.pr(this, "numberListAnnots.getRightmostEnd( =  " + numberListAnnots.getRightmostEnd());  
+      doc.addAnnotation(
+        "number",
+        numberListAnnots.getLeftmostStart(),
+        numberListAnnots.getRightmostEnd(),
+        "sum",
+        new Integer(theSum)
+      );
+    //parser strips off this:   }

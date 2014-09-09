@@ -1,0 +1,35 @@
+// Test12.jape
+// Hamish 22/9/98
+// $Id$
+
+
+Phase:	Test12Phase
+
+
+Rule:	InitCapsCdg
+
+(
+  (
+    // this one matches
+    {Token.orth == "initCap", ! Lookup.majorType == "CDG"}
+
+    // this one doesn't
+    // {! Lookup.majorType == "CDG", Token.orth == "initCap"}
+  )+
+  {Lookup.majorType == "CDG"}
+):orgName
+
+-->
+
+:orgName.Name = {kind = "organisation", rule = "InitCapsCdg"}
+
+
+Rule:	Thing
+
+(
+  {Token.orth == "initCap", Lookup.majorType == "CDG"}
+):orgName
+
+-->
+
+:orgName.Thing = {kind = "organisation", rule = "InitCapsCdg"}

@@ -1,0 +1,52 @@
+// date2small.jape
+// Brianm, 29/Sep/98
+
+Phase:	DateRulesOk
+Options: control = appelt
+
+Macro:	ONE_OR_TWO_DIGITS
+(
+  {Token.kind == "num", Token.length == 1}
+  |
+  {Token.format == "twoDigitNum"}
+)
+
+Macro:	ONE_OR_TWO_NEGATIVE_DIGITS
+(
+  // the Token length is "2" for a 1 digit number because it 
+  // includes the "-" sign
+  {Token.sign == "-", Token.length == 2}
+  |
+  {Token.sign == "-", Token.format == "twoDigitNum"}
+)
+
+Macro:	TWO_OR_FOUR_DIGITS
+(
+  {Token.format == "fourDigitNum"}
+  |
+  {Token.format == "twoDigitNum"}
+)
+
+Macro:	TWO_OR_FOUR_NEGATIVE_DIGITS
+(
+  {Token.sign == "-", Token.format == "fourDigitNum"}
+  |
+  {Token.sign == "-", Token.format == "twoDigitNum"}
+)
+
+Rule:	NumsHyphens
+(
+  (
+    ONE_OR_TWO_DIGITS
+    ONE_OR_TWO_NEGATIVE_DIGITS
+    TWO_OR_FOUR_NEGATIVE_DIGITS
+  )
+  |
+  (
+    TWO_OR_FOUR_DIGITS
+    ONE_OR_TWO_NEGATIVE_DIGITS
+    ONE_OR_TWO_NEGATIVE_DIGITS
+  )
+):dateName
+-->
+:dateName.Name = {kind = "date", rule = "NumsHypens"}

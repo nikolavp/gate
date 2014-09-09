@@ -1,0 +1,18 @@
+
+
+    // Test24.jape
+    // Simple test for Jane using Gaz testtext.txt
+    // Hamish, 2/2/98
+    // $Id$
+
+    Phase:	Test24
+    Options: control = appelt
+
+
+    Rule:	Num1
+    (
+      {Token.string == "a"}
+      {Token.string == "time"}
+    ):num
+    -->
+    :num.Name = {rule = "Num1"}

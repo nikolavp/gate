@@ -1,0 +1,44 @@
+
+// money1.jape
+// Brianm, 12/Aug/98
+
+Phase:	Money1
+Input:	Token
+
+Rule:	CountryTokenisedMoneyAmount
+  (
+      {Token.kind == "allCaps"} {Token.kind == "money"} 
+  ) :amount
+
+  -->
+
+  :amount{
+
+    doc.addAnnotation(
+      "Name",
+      amountAnnots.getLeftmostStart(),
+      amountAnnots.getRightmostEnd(),
+      "money",
+      "really big spender"
+    );
+
+  } // amount
+
+
+Rule:	RawTokenisedMoneyAmount
+    ( {Token.kind == "money"} ) :amount
+
+  -->
+
+  :amount{
+
+    doc.addAnnotation(
+      "Name",
+      amountAnnots.getLeftmostStart(),
+      amountAnnots.getRightmostEnd(),
+      "money",
+      "big spender"
+    );
+
+  } // amount
+

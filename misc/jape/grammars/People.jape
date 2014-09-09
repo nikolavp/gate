@@ -1,0 +1,54 @@
+// People.jape
+
+Phase: People
+
+Macro: PersonDe
+(
+   {Token.string == "de"}
+   |
+   {Token.string == "De"}
+   |
+   {Token.string == "di"}
+   |
+   {Token.string == "Di"}
+   |
+   {Token.string == "von"}
+   |
+   {Token.string == "Von"}
+   |
+   {Token.string == "van"}
+   |
+   {Token.string == "Van"}
+)
+
+
+Macro: PersonSpecial
+(
+  {Lookup.minorType == "PERSON_FIRST"}
+  |
+  {Lookup.minorType == "PERSON_FULL"}
+)
+
+
+Rule: PersonName3
+(
+  (
+    PersonSpecial 
+    PersonDe
+  )
+  (
+    ({Token.orth == "initCap"})+
+  )
+):personName
+-->
+:personName.Name = {kind = "person", rule = "PersonName3"}
+
+
+Rule: Person
+(
+  {Lookup.minorType == "PERSON_FIRST"}
+  {Token.string == "von"}
+  ( {Token.orth == "initCap"} )+
+):personName
+-->
+:personName.Name = {kind = "person", rule = "Person"}

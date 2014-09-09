@@ -1,0 +1,8 @@
+<CREOLE-DIRECTORY>
+  <!-- $Id$ -->
+  <CREOLE>
+    <JAR SCAN="true">gate-termraider.jar</JAR>
+    <!-- core-renderer.jar is now in gate/lib -->
+    <!-- opencsv-2.3.jar was superseded by datastore serialization -->
+  </CREOLE>
+</CREOLE-DIRECTORY>

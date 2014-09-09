@@ -1,0 +1,10 @@
+// Test9.jape
+//
+// Test multi-phase thingies
+// Hamish, 17/9/98
+//
+// $Id$
+
+
+Multiphase: Test9MPT
+Phases: Test8

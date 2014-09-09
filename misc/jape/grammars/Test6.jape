@@ -1,0 +1,68 @@
+// Test6.jape
+//
+// Test the new RHS stuff, against e.g. text JapeNewRHSTestDoc.txt
+// Hamish, 19/8/98
+//
+// $Id$
+
+
+Phase:	TestNewRhsStuff
+Input:	Token
+
+/*
+ * KiloAmount: recognise sequences of numbers followed by a word
+ * meaning kilos, and add annotations in the various different ways
+ * now available on the RHS.
+ */
+Rule:	KiloAmount
+
+  (
+    (
+      ( {Token.kind == "otherNum"} | {Token.kind == "twoDigitNum"} ):firstNum
+      ( {Token.kind == "otherNum"} | {Token.kind == "twoDigitNum"} )* 
+    ):numbers
+    (
+      {Token.string == "kilograms"} | {Token.string == "kilos"} 
+    )
+  ):whole
+
+-->
+
+  // 1. create a new annot with single span and simple attribute values
+  :numbers.NewAnnotType1 =
+    { kind = "numberList", thing = twonk, otherthing = -243.68 },
+
+  // 2. create new annot with composite span and simple attributes
+  :+numbers.NewAnnotType2 =
+    { kind = "numberList", thing = twonk, otherthing = -243.68 },
+
+  // 3. create a new annot with single span and attr values picked from
+  //    a different annotation set
+  :whole.NewAnnotType3 =   
+    {
+      kind = "kiloAmmount", firstNum = :firstNum.Token.string,
+      firstNumKind = :firstNum.Token.kind 
+    },
+
+  /*
+   * 4. not doing this for now, but might do sometime if prevailed upon:
+   * 
+   * // change the value of an attribute on a bound set of annotations
+   * :whole.Token.kind = "kilos",
+   */
+
+  // 5. the old Java code method
+  :whole{
+    doc.addAnnotation(
+      "NewAnnotType5",
+      wholeAnnots.getLeftmostStart(), 
+      wholeAnnots.getRightmostEnd(),
+      "spanStrings",
+      doc.spanStrings(wholeAnnots)
+    );
+  },
+
+  // will looking at :firstNum annots mess us up now?
+  :firstNum{
+  }
+

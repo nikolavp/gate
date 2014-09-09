@@ -1,0 +1,40 @@
+
+// Test4.jape
+// Test RHS blocks - use doc Test4.txt
+// 
+// Hamish, 24/7/98
+//
+// $Id$
+
+
+Phase:	ExamplePhase
+
+
+// match a sequence of num
+
+Rule:	AllCaps
+
+( {Token.kind == "num"} )+ :numbers
+
+-->
+
+/* error
+:nonexistant{
+},
+*/
+
+{
+  // an anonymous block
+},
+
+:numbers{
+
+  doc.addAnnotation(
+    "numbers",
+    numbersAnnots.getLeftmostStart(),
+    numbersAnnots.getRightmostEnd(),
+    "thing",
+    "otherthing"
+  );
+
+} // numbers

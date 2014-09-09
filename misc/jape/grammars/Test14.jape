@@ -1,0 +1,41 @@
+// Test14.jape
+// Hamish 24/9/98
+// $Id$
+
+Phase:	PhaseTest14
+
+// The idea is to match "26 Feb" but not "26 of Feb" or "26-Feb"
+
+// this will match, but it will include intervening tokens, hence
+// matching all three
+Macro: ONE
+(
+  {Token.format == "twoDigitNum"}
+  {Lookup.minorType == "MONTH"}
+)
+
+// this won't work - it will always find another token, and so fail
+// via negation
+Macro: TWO
+(
+  {Token.format == "twoDigitNum"}
+  {! Token.annotType == "Token"}
+  {Lookup.minorType == "MONTH"}
+)
+
+// this works:
+// matches "26 Feb" but not "26-Feb" or "26 of Feb"
+Macro: THREE
+(
+  {Token.format == "twoDigitNum"}
+  {Token, Lookup.minorType == "MONTH"}
+)
+
+Rule:	Date1
+(
+  // ONE
+  // TWO
+  THREE
+):date
+-->
+:date.Name = {kind = "date", rule = "Date1"}

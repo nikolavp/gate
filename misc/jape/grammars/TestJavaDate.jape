@@ -1,0 +1,186 @@
+// date2.jape
+// Brianm, 28/Sep/98
+
+Phase:	DateRulesOk
+Options: control = appelt
+
+////////////////////////////////////////
+
+Macro: YEAR_MACRO
+     ({Token, Token.format == "twoDigitNum"}|
+     {Token, Token.format == "fourDigitNum"})
+
+////////////////////////////////////////
+
+Macro: DATE_BASE
+  {Token, Lookup.majorType == "DATE"}
+
+////////////////////////////////////////
+
+Macro: SLASH
+  ({Token.string == "/"} | {Token.string == "\"})
+
+////////////////////////////////////////
+  
+Macro: ORDINAL
+(
+  {Token, Token.kind == "num"}
+  ({Token.string == "TH"}|{Token.string == "th"}|
+   {Token.string == "RD"}|{Token.string == "rd"}|
+   {Token.string == "ND"}|{Token.string == "nd"}|
+   {Token.string == "ST"}|{Token.string == "st"})
+):ordinalBase
+
+////////////////////////////////////////
+
+Macro:	ONE_OR_TWO_DIGITS
+    ({Token.kind == "num", Token.length == 1}
+    |
+    {Token.format == "twoDigitNum"})
+
+////////////////////////////////////////
+
+Macro:	ONE_OR_TWO_NEGATIVE_DIGITS
+    ({Token.sign == "-", Token.length == 2}
+    |
+    {Token.sign == "-", Token.format == "twoDigitNum"})
+// the Token length is "2" for a 1 digit number because it includes the "-" sign
+
+////////////////////////////////////////
+
+Macro:	TWO_OR_FOUR_DIGITS
+        ({Token.format == "fourDigitNum"}
+        |
+	{Token.format == "twoDigitNum"})
+
+////////////////////////////////////////
+
+Macro:	TWO_OR_FOUR_NEGATIVE_DIGITS
+        ({Token.sign == "-", Token.format == "fourDigitNum"}
+        |
+	{Token.sign == "-", Token.format == "twoDigitNum"})
+
+////////////////////////////////////////
+/*
+Rule:	NumberDate
+	({Token.format == "twoDigitNum"}
+         {Token, Lookup.minorType == "MONTH"}):dateName
+  -->
+
+  :dateName.Name = {kind = "date", rule = "NumberDate"}
+*/
+////////////////////////////////////////
+
+Rule:	DateNumber
+	({Lookup.minorType == "MONTH"}
+         {Token, Token.format == "twoDigitNum"}):dateName
+  -->
+
+  :dateName.Name = {kind = "date", rule = "DateNumber"}
+
+////////////////////////////////////////
+
+Rule:	NumsHyphens
+    (
+      ( ONE_OR_TWO_DIGITS
+        ONE_OR_TWO_NEGATIVE_DIGITS
+        TWO_OR_FOUR_NEGATIVE_DIGITS
+      )
+      |
+      ( TWO_OR_FOUR_DIGITS
+        ONE_OR_TWO_NEGATIVE_DIGITS
+        ONE_OR_TWO_NEGATIVE_DIGITS
+      )
+    ):dateName
+
+  -->
+
+  :dateName.Name = {kind = "date", rule = "NumsHypens"}
+
+////////////////////////////////////////
+/*
+Rule:	NumsSlashes
+    (
+      ( ONE_OR_TWO_DIGITS
+        SLASH
+        ONE_OR_TWO_DIGITS
+        SLASH
+        TWO_OR_FOUR_DIGITS
+      )
+      |
+      ( TWO_OR_FOUR_DIGITS
+        SLASH
+        ONE_OR_TWO_DIGITS
+        SLASH
+        ONE_OR_TWO_DIGITS
+      )
+    ):dateName
+
+  -->
+
+  :dateName.Name = {kind = "date", rule = "NumsSlashes"}
+
+////////////////////////////////////////
+
+Rule:	NumOfMonth
+
+	((ONE_OR_TWO_DIGITS
+	 |
+	 ORDINAL)
+	  {Token, Token.string == "of"}
+	  {Token, Lookup.minorType == "MONTH"}
+        ):dateName
+  -->
+
+  :dateName.Name = {kind = "date", rule = "NumOfMonth"}
+
+////////////////////////////////////////
+
+// Rule:	PrepDate
+// in on during before after "prior to"
+*/
+
+
+////////////////////////////////////////
+
+Rule:	Year
+// this rule may fire but not add an annotation
+
+	(YEAR_MACRO):dateName
+  -->
+
+  :dateName{  // let's do some Java!
+
+  int yearValue =
+    Integer.parseInt(
+      doc.spanStrings(dateNameAnnots.nth(0))
+  );
+
+  // if the value looks like a valid year, then add an annotation
+  if ( (yearValue < 2100) && (yearValue > 900) ) {
+
+  try {
+          JdmSpanSequence spans = new JdmSpanSequence();
+          spans.append( new JdmSpan(dateNameAnnots.getLeftmostStart(),
+                              dateNameAnnots.getRightmostEnd() ) );
+
+    JdmAttribute kind = new JdmAttribute("kind", "date");
+    JdmAttribute rule = new JdmAttribute("rule", "Year");
+
+
+    JdmAttributeSequence  allAttribs = new JdmAttributeSequence();
+    allAttribs.append(kind);
+    allAttribs.append(rule);
+
+    doc.addAnnotation(new JdmAnnotation("Name", spans, allAttribs) );
+  } catch (JdmException ex) {
+    //do nothing for now
+  }
+
+
+  } // if
+
+  } // dateName javacode
+
+////////////////////////////////////////
+

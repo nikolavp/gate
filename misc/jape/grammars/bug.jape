@@ -1,0 +1,25 @@
+// bug.jape
+// Hamish, 16/9/98
+
+Phase:	Bug
+Input:	Token
+
+
+Rule:	InitCapsCdg
+
+(
+  (
+    {Token.orth == "initCap"} |
+    ( {Token.orth == "initCap"} {Token.orth == "initCap"} ) |
+    (
+      {Token.orth == "initCap"} {Token.orth == "initCap"} 
+      {Token.orth == "initCap"}
+    )
+  )
+  {Lookup.majorType == "CDG"}
+):orgName
+
+-->
+
+:orgName.Name = {kind = "organisation", rule = "InitCapsCdg"}
+

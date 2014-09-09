@@ -1,0 +1,46 @@
+
+//File Test17.jape
+
+Multiphase:   AventinusNamedEntitie
+
+
+Phase: Person1
+Options: control = appelt
+
+//Rule in Person1.jape
+Rule: PersonNamePattern
+
+(
+  (
+   {Lookup.majorType == "PERSON_FIRST"}
+   {Token.orth == "initCap"}
+   )
+) :personName
+-->
+:personName.Pattern = {kind = "person", rule = "PersonNamePattern"}
+
+
+Phase: Ending1
+Options: control = appelt
+
+Macro: PersonEnding
+(
+ ({Token.string == "Jr"}{Token.string == "."})
+ |
+ {Token.string == "Sr"}
+ |
+ {Token.string == "II"}
+ |
+ {Token.string == "III"}
+)
+
+Rule: PersonName
+(
+  ({Pattern.kind == "person"}
+   {Token.string == "Jr"}
+   {Token.string == "."}
+   )
+):personName
+-->
+:personName.Name = {kind = "person", rule = "PersonName"}
+

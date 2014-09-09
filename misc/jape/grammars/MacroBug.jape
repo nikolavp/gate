@@ -1,0 +1,60 @@
+// MacroBug.jape
+
+
+/*
+
+Macro: DATE_BASE
+(
+  {Lookup.majorType == "DATE"}|
+  {Token.format == "twoDigitNum"}
+):dateBase
+
+*/
+
+
+////////////////////////
+// date1.jape
+// Brianm, 21/Sep/98
+////////////////////////
+
+Phase:	DateRules
+Input:	Token   // not that anyone's taking any notice of this line
+Options: control = appelt
+
+////////////////////////////////////////
+
+Macro: DATE_BASE
+(
+  {Lookup.majorType == "DATE"} |
+  (
+    {Token.format == "twoDigitNum"}
+    {Token.format == "twoDigitNum", Token.sign == "-"}
+  )
+):dateBase
+
+////////////////////////////////////////
+
+Rule:	NumberDate
+(
+  (
+    {Token.format == "twoDigitNum"}
+    DATE_BASE
+  ):dateName
+)
+-->
+:dateName.Name = {kind = "date", rule = "NumberDate"}
+
+////////////////////////////////////////
+
+Rule:	DateNumber
+  (
+	(DATE_BASE
+         {Token.format == "twoDigitNum"}):dateName
+  )
+  -->
+
+  :dateName.Name = {kind = "date", rule = "DateNumber"}
+
+////////////////////////////////////////
+
+

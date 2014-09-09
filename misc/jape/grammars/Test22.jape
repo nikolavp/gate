@@ -1,0 +1,30 @@
+
+
+    // Test22.jape
+    // Chasing second doc bug
+    // Hamish, 23.10.98
+    // $Id$
+
+    Phase:	Test22
+    Options: control = appelt
+
+
+/* In Brill style, we get applied once and tried 3 more times; in
+   Appelt style we get applied once and tried twice more. There
+   being only 2 tokens, we should only ever be tried twice.
+ */
+    Rule:	Num1
+    (
+      {Token.string == "a"}
+      {Token.kind == "num"}
+    ):num
+    -->
+    :num.Name = {rule = "Num1"}
+
+
+    Rule:	Num2
+    (
+      {Token.string == "a"}
+    ):num
+    -->
+    :num.Name = {rule = "Num2"}

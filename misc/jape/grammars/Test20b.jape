@@ -1,0 +1,10 @@
+// Test20b
+
+Phase: Test20b
+
+Macro: TITLE0
+( ( ({Token, Lookup.majorType == "TITLE"})+ ) )
+
+Macro: TITLE1
+( {Lookup.majorType == "TITLE"}
+  {Lookup.majorType == "TITLE"} )

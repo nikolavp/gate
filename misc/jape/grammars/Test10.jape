@@ -1,0 +1,60 @@
+// Test10.jape
+//
+// Test macros
+// Hamish, 17/9/98
+//
+// $Id$
+
+
+Multiphase: Test10Multi
+
+
+Phase: One
+Options: control=brill
+
+
+// Macros can appear anywhere a rule can. They can be either a
+// PatternElement or an Action (i.e. either the primitive constituent of a
+// rule lefthandside or righthandside respectively). They must be defined
+// before referencing, and they must be referenced from somewhere that
+// makes sense (i.e. no Actions in lefthandsides and vice versa).
+//
+// PatternElement macros may recursively include references to other
+// such macros.
+//
+// Action macros may only contain a single action.
+//
+// If you have two macros of the same name, the second silently
+// overwrites the first.
+
+
+// this one doesn't get used
+Macro: NUMBER
+( {Token.kind == "dogBreath"} ):number
+
+Macro: NUMBER
+( {Token.kind == "num"} ):number
+
+Macro: KILO_PATTERN
+( NUMBER {Token.string == "Kilograms"} ):whole
+
+
+Rule:	KiloAmount
+  KILO_PATTERN
+-->
+  :whole.Name = { amount = :number.Token.string },
+  :whole.Name = { kind = "KiloAmount" }
+
+
+Macro: KILO_ACTION1
+  :whole.Name2 = { amount = :number.Token.string }
+
+Macro: KILO_ACTION2
+  :biggerWhole.Name2 = { amount = :number.Token.string }
+
+
+Rule:	KiloAmountOf
+  ( KILO_PATTERN {Token.string == "of"} ):biggerWhole
+-->
+  KILO_ACTION1,
+  KILO_ACTION2
