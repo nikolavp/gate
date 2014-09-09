@@ -514,7 +514,7 @@ public class OrthoMatcher extends AbstractLanguageAnalyser {
       if (processedAnnots.containsValue(unknownString)) {
         Annotation matchedAnnot = orthoAnnotation.updateMatches(unknown, unknownString,processedAnnots,nameAllAnnots,matchesDocFeature);
         if (matchedAnnot == null) {
-          log.info("Orthomatcher: Unable to find the annotation: " +
+          log.debug("Orthomatcher: Unable to find the annotation: " +
                   orthoAnnotation.getStringForAnnotation(unknown, document) +
           " in matchUnknown");
         }

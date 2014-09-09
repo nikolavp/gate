@@ -209,7 +209,7 @@ public class BasicAnnotationOrthography implements AnnotationOrthography {
       if(annotString.equals(oldString)) {
         Annotation tempAnnot = nameAllAnnots.get(id);
         if(tempAnnot == null) {
-          log.warn("Orthomatcher: TempAnnot is null when looking at "
+          log.debug("Orthomatcher: TempAnnot is null when looking at "
               + annotString + " | " + oldString + " | old id: " + id);
           return null;
         }
