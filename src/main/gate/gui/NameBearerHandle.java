@@ -1135,10 +1135,18 @@ public class NameBearerHandle implements Handle, StatusListener,
           catch(ResourceInstantiationException rie) {
             fireStatusChanged("reinitialisation failed");
             rie.printStackTrace(Err.getPrintWriter());
-            JOptionPane.showMessageDialog(getLargeView(), "Reload failed!\n "
-                    + "See \"Messages\" tab for details!", "GATE",
-                    JOptionPane.ERROR_MESSAGE);
             fireProcessFinished();
+            
+            SwingUtilities.invokeLater(new Runnable() {
+
+              @Override
+              public void run() {
+                JOptionPane.showMessageDialog(getLargeView(), "Reload failed!\n "
+                        + "See \"Messages\" tab for details!", "GATE",
+                        JOptionPane.ERROR_MESSAGE);                
+              }              
+            });
+            
           }
         }// public void run()
       };
