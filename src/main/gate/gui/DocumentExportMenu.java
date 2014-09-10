@@ -62,6 +62,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableCellEditor;
 
 /**
@@ -425,29 +426,43 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
    */
   @Override
   public void resourceLoaded(CreoleEvent e) {
-    Resource res = e.getResource();
+    final Resource res = e.getResource();
 
     if(res instanceof DocumentExporter) {
-      addExporter((DocumentExporter)res);
+      SwingUtilities.invokeLater(new Runnable() {
+        
+        @Override
+        public void run() {
+          addExporter((DocumentExporter)res);
+        }
+      });
+      
     }
   }
 
   @Override
   public void resourceUnloaded(CreoleEvent e) {
-    Resource res = e.getResource();
+    final Resource res = e.getResource();
 
     if(res instanceof DocumentExporter) {
-      JMenuItem item = itemByResource.get(res);
+      SwingUtilities.invokeLater(new Runnable() {
+        
+        @Override
+        public void run() {
+          // TODO Auto-generated method stub
+          JMenuItem item = itemByResource.get(res);
 
-      if(item != null) {
-        remove(item);
-        itemByResource.remove(res);
-      }
-    }
-
-    if(getItemCount() == 2) {
-      remove(1);
-    }
+          if(item != null) {
+            remove(item);
+            itemByResource.remove(res);
+          }
+          
+          if(getItemCount() == 2) {
+            remove(1);
+          }
+        }
+      });     
+    }    
   }
 
   // remaining CreoleListener methods not used
