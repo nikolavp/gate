@@ -125,8 +125,18 @@ public class GappModel {
       try {
         relativeResourcePathElementsXPath =
                 XPath
-                        .newInstance("/gate.util.persistence.GateApplication/application"
+                        .newInstance(
+                                // URLHolder elements as map entry values
+                                  "/gate.util.persistence.GateApplication/application"
                                 + "//gate.util.persistence.PersistenceManager-URLHolder"
+                                + "/urlString[starts-with(., '$relpath$') "
+                                + "or starts-with(., '$resourceshome$') "
+                                + "or starts-with(., '$gatehome$')]"
+                                + " | "
+                                // specific Persistence object fields of type URLHolder
+                                // (e.g. datastore location)
+                                + "/gate.util.persistence.GateApplication/application"
+                                + "//*[@class='gate.util.persistence.PersistenceManager$URLHolder']"
                                 + "/urlString[starts-with(., '$relpath$') "
                                 + "or starts-with(., '$resourceshome$') "
                                 + "or starts-with(., '$gatehome$')]");
@@ -310,15 +320,15 @@ public class GappModel {
     // remove duplicate plugin entries
     try {
       // this XPath selects all URLHolders out of the URL list that have
-      // the same URL string as one of their following siblings, i.e. if
+      // the same URL string as one of their preceding siblings, i.e. if
       // there are N URLs in the list with the same value then this
       // XPath
-      // will select all but the last one of them.
+      // will select all but the first one of them.
       XPath duplicatePluginXPath =
               XPath
                       .newInstance("/gate.util.persistence.GateApplication/urlList"
                               + "/localList/gate.util.persistence.PersistenceManager-URLHolder"
-                              + "[urlString = following-sibling::gate.util.persistence.PersistenceManager-URLHolder/urlString]");
+                              + "[urlString = preceding-sibling::gate.util.persistence.PersistenceManager-URLHolder/urlString]");
       List<Element> duplicatePlugins =
               duplicatePluginXPath.selectNodes(gappDocument);
       for(Element e : duplicatePlugins) {
