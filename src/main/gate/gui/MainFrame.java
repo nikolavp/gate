@@ -1993,7 +1993,7 @@ public class MainFrame extends JFrame implements ProgressListener,
   /** Called when a {@link gate.DataStore} has been opened */
   @Override
   public void datastoreOpened(CreoleEvent e) {
-    DataStore ds = e.getDatastore();
+    final DataStore ds = e.getDatastore();
     if(ds.getName() == null || ds.getName().length() == 0){
       String name = ds.getStorageUrl();
       StringBuilder nameBuilder = new StringBuilder();
@@ -2030,11 +2030,17 @@ public class MainFrame extends JFrame implements ProgressListener,
       ds.setName(name);
     }
 
-    NameBearerHandle handle = new NameBearerHandle(ds, MainFrame.this);
-    DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
-    resourcesTreeModel.insertNodeInto(node, datastoresRoot, 0);
-    handle.addProgressListener(MainFrame.this);
-    handle.addStatusListener(MainFrame.this);
+    SwingUtilities.invokeLater(new Runnable() {
+      
+      @Override
+      public void run() {
+        NameBearerHandle handle = new NameBearerHandle(ds, MainFrame.this);
+        DefaultMutableTreeNode node = new DefaultMutableTreeNode(handle, false);
+        resourcesTreeModel.insertNodeInto(node, datastoresRoot, 0);
+        handle.addProgressListener(MainFrame.this);
+        handle.addStatusListener(MainFrame.this);        
+      }
+    });    
 
     // JPopupMenu popup = handle.getPopup();
     // popup.addSeparator();
@@ -2059,46 +2065,59 @@ public class MainFrame extends JFrame implements ProgressListener,
 
   /** Called when a {@link gate.DataStore} has been closed */
   @Override
-  public void datastoreClosed(CreoleEvent e) {
-    DataStore ds = e.getDatastore();
-    DefaultMutableTreeNode node;
-    DefaultMutableTreeNode parent = datastoresRoot;
-    if(parent != null) {
-      Enumeration<?> children = parent.children();
-      while(children.hasMoreElements()) {
-        node = (DefaultMutableTreeNode)children.nextElement();
-        if(((NameBearerHandle)node.getUserObject()).getTarget() == ds) {
-          resourcesTreeModel.removeNodeFromParent(node);
-          NameBearerHandle handle = (NameBearerHandle)node.getUserObject();
+  public void datastoreClosed(final CreoleEvent e) {
+    SwingUtilities.invokeLater(new Runnable() {
+      
+      @Override
+      public void run() {
+        DataStore ds = e.getDatastore();
+        DefaultMutableTreeNode node;
+        DefaultMutableTreeNode parent = datastoresRoot;
+        if(parent != null) {
+          Enumeration<?> children = parent.children();
+          while(children.hasMoreElements()) {
+            node = (DefaultMutableTreeNode)children.nextElement();
+            if(((NameBearerHandle)node.getUserObject()).getTarget() == ds) {
+              resourcesTreeModel.removeNodeFromParent(node);
+              NameBearerHandle handle = (NameBearerHandle)node.getUserObject();
 
-          if(handle.viewsBuilt()) {
-            if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
-              mainTabbedPane.remove(handle.getLargeView());
-            }
-            if(lowerScroll.getViewport().getView() == handle.getSmallView()) {
-              lowerScroll.getViewport().setView(null);
+              if(handle.viewsBuilt()) {
+                if(mainTabbedPane.indexOfComponent(handle.getLargeView()) != -1) {
+                  mainTabbedPane.remove(handle.getLargeView());
+                }
+                if(lowerScroll.getViewport().getView() == handle.getSmallView()) {
+                  lowerScroll.getViewport().setView(null);
+                }
+              }
+              return;
             }
           }
-          return;
         }
       }
-    }
+    });
+    
   }
 
   @Override
-  public void resourceRenamed(Resource resource, String oldName, String newName) {
-    //first find the handle for the renamed resource
-    Handle handle = findHandleForResource(resource);
-    if(handle != null && handle.viewsBuilt()){
-      //next see if there is a tab for this resource and rename it
-      for(int i = 0; i < mainTabbedPane.getTabCount(); i++) {
-        if(mainTabbedPane.getTitleAt(i).equals(oldName) &&
-           mainTabbedPane.getComponentAt(i) == handle.getLargeView()) {
-          mainTabbedPane.setTitleAt(i, newName);
-          return;
-        }
+  public void resourceRenamed(final Resource resource, final String oldName, final String newName) {
+    SwingUtilities.invokeLater(new Runnable() {
+      
+      @Override
+      public void run() {
+        //first find the handle for the renamed resource
+        Handle handle = findHandleForResource(resource);
+        if(handle != null && handle.viewsBuilt()){
+          //next see if there is a tab for this resource and rename it
+          for(int i = 0; i < mainTabbedPane.getTabCount(); i++) {
+            if(mainTabbedPane.getTitleAt(i).equals(oldName) &&
+               mainTabbedPane.getComponentAt(i) == handle.getLargeView()) {
+              mainTabbedPane.setTitleAt(i, newName);
+              return;
+            }
+          }
+        }        
       }
-    }
+    });
   }
 
   /**
