@@ -1628,31 +1628,32 @@ public class SerialControllerEditor extends AbstractVisualResource
 
     @Override
     public void actionPerformed(ActionEvent e){
+
+      if (memberPRsTable.getRowCount() == 0) {
+        JOptionPane.showMessageDialog(SerialControllerEditor.this,
+          "Add at least one processing resource in the right table\n"
+          +"that contains the resources of the application to be run.",
+          "GATE", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
+
+      //stop editing the parameters
+      try{
+        parametersEditor.setParameters();
+      }catch(ResourceInstantiationException rie){
+        JOptionPane.showMessageDialog(
+          SerialControllerEditor.this,
+          "Could not set parameters for the \"" +
+          parametersEditor.getResource().getName() +
+          "\" processing resource:\nSee \"Messages\" tab for details!",
+          "GATE", JOptionPane.ERROR_MESSAGE);
+          rie.printStackTrace(Err.getPrintWriter());
+          return;
+      }
+      
       Runnable runnable = new Runnable(){
         @Override
         public void run(){
-
-          if (memberPRsTable.getRowCount() == 0) {
-            JOptionPane.showMessageDialog(SerialControllerEditor.this,
-              "Add at least one processing resource in the right table\n"
-              +"that contains the resources of the application to be run.",
-              "GATE", JOptionPane.ERROR_MESSAGE);
-            return;
-          }
-
-          //stop editing the parameters
-          try{
-            parametersEditor.setParameters();
-          }catch(ResourceInstantiationException rie){
-            JOptionPane.showMessageDialog(
-              SerialControllerEditor.this,
-              "Could not set parameters for the \"" +
-              parametersEditor.getResource().getName() +
-              "\" processing resource:\nSee \"Messages\" tab for details!",
-              "GATE", JOptionPane.ERROR_MESSAGE);
-              rie.printStackTrace(Err.getPrintWriter());
-              return;
-          }
 
           if(corpusControllerMode){
             //set the corpus
