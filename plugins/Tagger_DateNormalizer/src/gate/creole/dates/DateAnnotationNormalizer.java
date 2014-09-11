@@ -95,7 +95,7 @@ public class DateAnnotationNormalizer extends DateNormalizer {
             cal.setTime(documentDate != null ? documentDate : new Date());
             
             Calendar parsed = Calendar.getInstance();
-            cal.setTime(d);
+            parsed.setTime(d);
             
             String relative = "present";
             if (parsed.before(cal)) relative = "past";
