@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.swing.AbstractCellEditor;
@@ -388,7 +389,15 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           break;
         }
         case 3: {
-          pDisj.setValue(aValue);
+          Object oldValue = pDisj.getValue();
+          if (!Objects.equals(oldValue, aValue)) {
+            pDisj.setValue(aValue);
+            try {
+              ResourceParametersEditor.this.resource.setParameterValue(pDisj.getName(), pDisj.getValue());
+            } catch(ResourceInstantiationException e) {
+              e.printStackTrace();
+            }            
+          }
           break;
         }
         default: {
