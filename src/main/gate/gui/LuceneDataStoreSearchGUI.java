@@ -1070,72 +1070,82 @@ public class LuceneDataStoreSearchGUI extends AbstractVisualResource implements
 
   }
 
-  private void showResultInDocument(Document doc, Pattern result) {
-    try {
-      // find the document view associated with the document
-      TextualDocumentView t = null;
-      for(Resource r : Gate.getCreoleRegister().getAllInstances(
-              "gate.gui.docview.TextualDocumentView")) {
-        if(((TextualDocumentView)r).getDocument().getName()
-                .equals(doc.getName())) {
-          t = (TextualDocumentView)r;
-          break;
-        }
-      }
+  private void showResultInDocument(final Document doc, final Pattern result) {
+    SwingUtilities.invokeLater(new Runnable() {
 
-      if(t != null && t.getOwner() != null) {
-        // display the annotation sets view
-        t.getOwner().setRightView(0);
+      @Override
+      public void run() {
         try {
-          // scroll to the expression that matches the query result
-          t.getTextView().scrollRectToVisible(
-                  t.getTextView()
-                          .modelToView(result.getRightContextEndOffset()));
-        } catch(BadLocationException e) {
-          e.printStackTrace();
-          return;
-        }
-        // select the expression that matches the query result
-        t.getTextView().select(result.getLeftContextStartOffset(),
-                result.getRightContextEndOffset());
-        t.getTextView().requestFocus();
-      }
-
-      // find the annotation sets view associated with the document
-      for(Resource r : Gate.getCreoleRegister().getAllInstances(
-              "gate.gui.docview.AnnotationSetsView")) {
-        AnnotationSetsView asv = (AnnotationSetsView)r;
-        if(asv == null) {
-          continue;
-        }
-        if(asv.isActive() && asv.getDocument().getName().equals(doc.getName())) {
-          // display the same annotation types as in Annic
-          for(int row = 0; row < numStackRows; row++) {
-            if(stackRows[row][DISPLAY].equals("false")) {
-              continue;
-            }
-            String type = stackRows[row][ANNOTATION_TYPE];
-            if(type.equals(Constants.ANNIC_TOKEN)) {
-              // not interesting to display them
-              continue;
-            }
-            // look if there is the type displayed in Annic
-            String asn = result.getAnnotationSetName();
-            if(asn.equals(Constants.DEFAULT_ANNOTATION_SET_NAME)
-                    && doc.getAnnotations().getAllTypes().contains(type)) {
-              asv.setTypeSelected(null, type, true);
-            } else if(doc.getAnnotationSetNames().contains(asn)
-                    && doc.getAnnotations(asn).getAllTypes().contains(type)) {
-              asv.setTypeSelected(asn, type, true);
+          // find the document view associated with the document
+          TextualDocumentView t = null;
+          for(Resource r : Gate.getCreoleRegister().getAllInstances(
+                  "gate.gui.docview.TextualDocumentView")) {
+            if(((TextualDocumentView)r).getDocument().getName()
+                    .equals(doc.getName())) {
+              t = (TextualDocumentView)r;
+              break;
             }
           }
-          break;
-        }
-      }
 
-    } catch(gate.util.GateException e) {
-      e.printStackTrace();
-    }
+          if(t != null && t.getOwner() != null) {
+            // display the annotation sets view
+            t.getOwner().setRightView(0);
+            try {
+              // scroll to the expression that matches the query result
+              t.getTextView().scrollRectToVisible(
+                      t.getTextView()
+                              .modelToView(result.getRightContextEndOffset()));
+            } catch(BadLocationException e) {
+              e.printStackTrace();
+              return;
+            }
+            // select the expression that matches the query result
+            t.getTextView().select(result.getLeftContextStartOffset(),
+                    result.getRightContextEndOffset());
+            t.getTextView().requestFocus();
+          }
+
+          // find the annotation sets view associated with the document
+          for(Resource r : Gate.getCreoleRegister().getAllInstances(
+                  "gate.gui.docview.AnnotationSetsView")) {
+            AnnotationSetsView asv = (AnnotationSetsView)r;
+            if(asv == null) {
+              continue;
+            }
+            if(asv.isActive() && asv.getDocument().getName().equals(doc.getName())) {
+              // display the same annotation types as in Annic
+              for(int row = 0; row < numStackRows; row++) {
+                if(stackRows[row][DISPLAY].equals("false")) {
+                  continue;
+                }
+                String type = stackRows[row][ANNOTATION_TYPE];
+                if(type.equals(Constants.ANNIC_TOKEN)) {
+                  // not interesting to display them
+                  continue;
+                }
+                // look if there is the type displayed in Annic
+                String asn = result.getAnnotationSetName();
+                if(asn.equals(Constants.DEFAULT_ANNOTATION_SET_NAME)
+                        && doc.getAnnotations().getAllTypes().contains(type)) {
+                  asv.setTypeSelected(null, type, true);
+                } else if(doc.getAnnotationSetNames().contains(asn)
+                        && doc.getAnnotations(asn).getAllTypes().contains(type)) {
+                  asv.setTypeSelected(asn, type, true);
+                }
+              }
+              break;
+            }
+          }
+
+        } catch(gate.util.GateException e) {
+          e.printStackTrace();
+        }
+        
+      }
+      
+    });
+    
+    
   } // private void showExpressionInDocument
 
   /**
