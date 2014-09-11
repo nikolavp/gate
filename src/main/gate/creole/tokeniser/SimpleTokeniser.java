@@ -616,15 +616,13 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
     String content = document.getContent().toString();
     int length = content.length();
-    char currentChar;
+    int currentChar;
+    int charsInCurrentCP = 1;
 
     DFSMState graphPosition = dInitialState;
 
     //the index of the first character of the token trying to be recognised
     int tokenStart = 0;
-
-    //the index of the last character of the last token recognised
-    int lastMatch = -1;
 
     DFSMState lastMatchingState = null;
     DFSMState nextState;
@@ -634,7 +632,12 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     FeatureMap newTokenFm;
 
     while(charIdx < length){
-      currentChar = content.charAt(charIdx);
+      currentChar = content.codePointAt(charIdx);
+      // number of chars we have to advance after processing this code point.
+      // 1 in the vast majority of cases, but 2 where the code point is a
+      // supplementary character represented as a surrogate pair.
+      charsInCurrentCP = Character.isSupplementaryCodePoint(currentChar) ? 2 : 1;
+      
 //      Out.println(
 //      currentChar + typesMnemonics[Character.getType(currentChar)+128]);
       nextState = graphPosition.next(typeIds.get(
@@ -643,15 +646,17 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
       if( null != nextState ) {
         graphPosition = nextState;
         if(graphPosition.isFinal()) {
-          lastMatch = charIdx;
           lastMatchingState = graphPosition;
         }
-        charIdx ++;
+        charIdx += charsInCurrentCP;
       } else {//we have a match!
         newTokenFm = Factory.newFeatureMap();
 
         if (null == lastMatchingState) {
-          tokenString = content.substring(tokenStart, tokenStart +1);
+          // no rule matches this character, so create a single-char
+          // DEFAULT_TOKEN annotation covering it and start again after it
+          charIdx  = tokenStart + charsInCurrentCP;
+          tokenString = content.substring(tokenStart, charIdx);
           newTokenFm.put("type","UNKNOWN");
           newTokenFm.put(TOKEN_STRING_FEATURE_NAME, tokenString);
           newTokenFm.put(TOKEN_LENGTH_FEATURE_NAME,
@@ -659,7 +664,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
           try {
             annotationSet.add(new Long(tokenStart),
-                              new Long(tokenStart + 1),
+                              new Long(charIdx),
                               "DEFAULT_TOKEN", newTokenFm);
           } catch (InvalidOffsetException ioe) {
             //This REALLY shouldn't happen!
@@ -667,9 +672,9 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
           }
           // Out.println("Default token: " + tokenStart +
           //             "->" + tokenStart + " :" + tokenString + ";");
-          charIdx  = tokenStart + 1;
         } else {
-          tokenString = content.substring(tokenStart, lastMatch + 1);
+          // we've reached the end of a string that the FSM recognised
+          tokenString = content.substring(tokenStart, charIdx);
           newTokenFm.put(TOKEN_STRING_FEATURE_NAME, tokenString);
           newTokenFm.put(TOKEN_LENGTH_FEATURE_NAME,
                          Integer.toString(tokenString.length()));
@@ -684,7 +689,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
           try {
             annotationSet.add(new Long(tokenStart),
-                            new Long(lastMatch + 1),
+                            new Long(charIdx),
                             lastMatchingState.getTokenDesc()[0][0], newTokenFm);
           } catch(InvalidOffsetException ioe) {
             //This REALLY shouldn't happen!
@@ -694,9 +699,10 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
           // Out.println(lastMatchingState.getTokenDesc()[0][0] +
           //              ": " + tokenStart + "->" + lastMatch +
           //              " :" + tokenString + ";");
-          charIdx = lastMatch + 1;
+          //charIdx = lastMatch + 1;
         }
 
+        // reset to initial state and start looking again from here
         lastMatchingState = null;
         graphPosition = dInitialState;
         tokenStart = charIdx;
@@ -711,7 +717,8 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
     } // while(charIdx < length)
 
     if (null != lastMatchingState) {
-      tokenString = content.substring(tokenStart, lastMatch + 1);
+      // we dropped off the end having found a match, annotate it
+      tokenString = content.substring(tokenStart, charIdx);
       newTokenFm = Factory.newFeatureMap();
       newTokenFm.put(TOKEN_STRING_FEATURE_NAME, tokenString);
       newTokenFm.put(TOKEN_LENGTH_FEATURE_NAME,
@@ -725,7 +732,7 @@ public class SimpleTokeniser extends AbstractLanguageAnalyser{
 
       try {
         annotationSet.add(new Long(tokenStart),
-                          new Long(lastMatch + 1),
+                          new Long(charIdx),
                           lastMatchingState.getTokenDesc()[0][0], newTokenFm);
       } catch(InvalidOffsetException ioe) {
         //This REALLY shouldn't happen!
