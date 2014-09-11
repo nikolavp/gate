@@ -23,8 +23,8 @@ import gate.creole.metadata.CreoleResource;
 import gate.creole.metadata.RunTime;
 
 import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.regex.Pattern;
 
 import mark.util.DateParser;
 import mark.util.ParsePositionEx;
@@ -56,6 +56,7 @@ public class DateAnnotationNormalizer extends DateNormalizer {
     return wholeMatchOnly;
   }
       
+  @SuppressWarnings("deprecation")
   @Override
   protected void annotate(Date documentDate, DateParser dp, DateFormat df) throws ExecutionException {    
     AnnotationSet dates = document.getAnnotations(getInputASName()).get(getAnnotationName());
@@ -84,8 +85,28 @@ public class DateAnnotationNormalizer extends DateNormalizer {
         
         if(d == null) {
           //if the text didn't parse skip on to the next character and try again
-          //start++;
-          continue;
+          if (text.matches("[0-9]{4}")) {
+            d = new Date(Integer.parseInt(text)-1900,0,1);
+            
+            pp.setIndex(4);
+            pp.getFeatures().put("inferred", DateParser.MONTH | DateParser.DAY);
+            
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(documentDate != null ? documentDate : new Date());
+            
+            Calendar parsed = Calendar.getInstance();
+            cal.setTime(d);
+            
+            String relative = "present";
+            if (parsed.before(cal)) relative = "past";
+            if (parsed.after(cal)) relative = "future";
+   
+            pp.getFeatures().put("relative", relative);          
+            
+          }
+          else {
+            continue;            
+          }
         }
         
         if (wholeMatchOnly && pp.getIndex() != text.length()) {
