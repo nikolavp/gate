@@ -34,7 +34,7 @@ public class MatchRule14 implements OrthoMatcherRule {
 	      result =  false;
 	    else {
     	    // now do the matching
-    	    for (int i=0,j= 0; i < orthomatcher.tokensShortAnnot.size() && mismatches < 2; i++) {
+    	    for (int i=0,j= 0; i < orthomatcher.tokensShortAnnot.size() && j < orthomatcher.tokensLongAnnot.size() && mismatches < 2; i++) {
     
     //	    Out.prln("i = " + i);
     //	    Out.prln("j = " + j);
