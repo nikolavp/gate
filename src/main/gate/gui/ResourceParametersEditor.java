@@ -392,7 +392,7 @@ public class ResourceParametersEditor extends XJTable implements CreoleListener 
           Object oldValue = pDisj.getValue();
           if (!Objects.equals(oldValue, aValue)) {
             pDisj.setValue(aValue);
-            if (ResourceParametersEditor.this.resource == null) break;
+            if (ResourceParametersEditor.this == null || ResourceParametersEditor.this.resource == null) break;
             try {
               ResourceParametersEditor.this.resource.setParameterValue(pDisj.getName(), pDisj.getValue());
             } catch(ResourceInstantiationException e) {
