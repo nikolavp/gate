@@ -29,6 +29,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -43,10 +44,11 @@ public class PopulationDialogWrapper  {
   protected PopulationConfig config;
   private JTextField encodingField;
   private JCheckBox checkbox;
-  private XJFileChooser chooser;
+  private JFileChooser chooser;
   private List<URL> fileUrls;
   private ListEditor featureKeysEditor, contentKeysEditor;
 
+  public static final String RESOURCE_CODE = "twitter.population";
   private static final Logger logger = Logger.getLogger(PopulationDialogWrapper.class.getName());
 
   
@@ -108,9 +110,10 @@ public class PopulationDialogWrapper  {
     dialog.add(new JSeparator(SwingConstants.HORIZONTAL));
     dialog.add(Box.createVerticalStrut(2));
     
-    chooser = new XJFileChooser();
+    //chooser = MainFrame.getFileChooser();
+    chooser = new JFileChooser();
     // TODO Fix this to get GATE to remember last location.
-    //chooser.setResource(PopulationDialogWrapper.class.getName());
+    //chooser.setResource(RESOURCE_CODE);
     chooser.setFileSelectionMode(XJFileChooser.FILES_ONLY);
     chooser.setMultiSelectionEnabled(true);
     chooser.setDialogTitle("Select a Twitter JSON file");

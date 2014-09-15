@@ -13,6 +13,7 @@ package gate.corpora.twitter;
 
 
 import gate.Gate;
+import gate.gui.MainFrame;
 import gate.swing.XJFileChooser;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +24,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.JFileChooser;
 import org.apache.log4j.Logger;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
@@ -142,6 +144,8 @@ public class PopulationConfig   {
 
 
 class LoadConfigListener implements ActionListener {
+  public static final String RESOURCE_CODE = "twitter.population.config";
+
   PopulationDialogWrapper wrapper;
   
   public LoadConfigListener(PopulationDialogWrapper wrapper) {
@@ -150,9 +154,10 @@ class LoadConfigListener implements ActionListener {
 
   @Override
   public void actionPerformed(ActionEvent arg0) {
-    XJFileChooser chooser = new XJFileChooser();
+    //XJFileChooser chooser = MainFrame.getFileChooser();
     //TODO Get GATE to remember last location.
-    //chooser.setResource(PopulationConfig.class.getName());
+    //chooser.setResource(RESOURCE_CODE);
+    JFileChooser chooser = new JFileChooser();
     chooser.setDialogTitle("Load XML configuration");
     chooser.setFileSelectionMode(XJFileChooser.FILES_ONLY);
     int chosen = chooser.showOpenDialog(this.wrapper.dialog);
