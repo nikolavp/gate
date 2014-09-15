@@ -13,6 +13,7 @@ package gate.corpora.twitter;
 
 import gate.gui.ListEditorDialog;
 import gate.gui.MainFrame;
+import gate.swing.XJFileChooser;
 import gate.util.ExtensionFileFilter;
 import gate.util.Strings;
 import java.awt.Window;
@@ -28,13 +29,13 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import org.apache.log4j.Logger;
 
 
 public class PopulationDialogWrapper  {
@@ -42,9 +43,11 @@ public class PopulationDialogWrapper  {
   protected PopulationConfig config;
   private JTextField encodingField;
   private JCheckBox checkbox;
-  private JFileChooser chooser;
+  private XJFileChooser chooser;
   private List<URL> fileUrls;
   private ListEditor featureKeysEditor, contentKeysEditor;
+
+  private static final Logger logger = Logger.getLogger(PopulationDialogWrapper.class.getName());
 
   
   public PopulationDialogWrapper() {
@@ -105,8 +108,10 @@ public class PopulationDialogWrapper  {
     dialog.add(new JSeparator(SwingConstants.HORIZONTAL));
     dialog.add(Box.createVerticalStrut(2));
     
-    chooser = new JFileChooser();
-    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser = new XJFileChooser();
+    // TODO Fix this to get GATE to remember last location.
+    //chooser.setResource(PopulationDialogWrapper.class.getName());
+    chooser.setFileSelectionMode(XJFileChooser.FILES_ONLY);
     chooser.setMultiSelectionEnabled(true);
     chooser.setDialogTitle("Select a Twitter JSON file");
     chooser.resetChoosableFileFilters();
@@ -176,7 +181,7 @@ public class PopulationDialogWrapper  {
       }
     }
     catch (MalformedURLException e) {
-      e.printStackTrace();
+      logger.warn("Error loading file", e);
     }
     finally {
       this.dialog.dispose();
@@ -202,7 +207,7 @@ class PopulationDialogListener implements ActionListener {
   
   @Override
   public void actionPerformed(ActionEvent event) {
-    if (event.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)){
+    if (event.getActionCommand().equals(XJFileChooser.APPROVE_SELECTION)){
       this.dialog.loadFile();
     }
     else {

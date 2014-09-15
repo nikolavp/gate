@@ -13,6 +13,7 @@ package gate.corpora.twitter;
 
 
 import gate.Gate;
+import gate.swing.XJFileChooser;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -22,7 +23,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.JFileChooser;
+import org.apache.log4j.Logger;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -32,6 +33,7 @@ public class PopulationConfig   {
   private String encoding;
   private List<String> featureKeys, contentKeys;
   private int tweetsPerDoc;
+  
   
   public boolean getOneDocCheckbox() {
     return this.tweetsPerDoc == 1;
@@ -148,11 +150,13 @@ class LoadConfigListener implements ActionListener {
 
   @Override
   public void actionPerformed(ActionEvent arg0) {
-    JFileChooser chooser = new JFileChooser();
+    XJFileChooser chooser = new XJFileChooser();
+    //TODO Get GATE to remember last location.
+    //chooser.setResource(PopulationConfig.class.getName());
     chooser.setDialogTitle("Load XML configuration");
-    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser.setFileSelectionMode(XJFileChooser.FILES_ONLY);
     int chosen = chooser.showOpenDialog(this.wrapper.dialog);
-    if (chosen == JFileChooser.APPROVE_OPTION) {
+    if (chosen == XJFileChooser.APPROVE_OPTION) {
       wrapper.setNewConfig(PopulationConfig.load(chooser.getSelectedFile()));
     }
   }
@@ -162,23 +166,25 @@ class LoadConfigListener implements ActionListener {
 class SaveConfigListener implements ActionListener {
   PopulationDialogWrapper wrapper;
   
+  private static final Logger logger = Logger.getLogger(SaveConfigListener.class.getName());
+  
   public SaveConfigListener(PopulationDialogWrapper wrapper) {
     this.wrapper = wrapper;
   }
 
   @Override
-  public void actionPerformed(ActionEvent e) {
-    JFileChooser chooser = new JFileChooser();
+  public void actionPerformed(ActionEvent event) {
+    XJFileChooser chooser = new XJFileChooser();
     chooser.setDialogTitle("Save configuration as XML");
-    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    chooser.setFileSelectionMode(XJFileChooser.FILES_ONLY);
     int chosen = chooser.showSaveDialog(this.wrapper.dialog);
-    if (chosen == JFileChooser.APPROVE_OPTION) {
+    if (chosen == XJFileChooser.APPROVE_OPTION) {
       try {
         wrapper.updateConfig();
         wrapper.config.saveXML(chooser.getSelectedFile());
       } 
-      catch(IOException e1) {
-        e1.printStackTrace();
+      catch(IOException exception) {
+        logger.warn("Error saving population config", exception);
       }
     }
   }
