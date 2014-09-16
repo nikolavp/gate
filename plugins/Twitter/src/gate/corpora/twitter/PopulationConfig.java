@@ -13,7 +13,6 @@ package gate.corpora.twitter;
 
 
 import gate.Gate;
-import gate.gui.MainFrame;
 import gate.swing.XJFileChooser;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

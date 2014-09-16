@@ -39,7 +39,7 @@ public class TweetStreamIterator implements Iterator<Tweet> {
   private JsonParser jsonParser;
   private MappingIterator<JsonNode> iterator;
   private List<String> contentKeys, featureKeys;
-  private boolean nested, hasNextNode;
+  private boolean nested;
   private Iterator<JsonNode> nestedStatuses;
   private JsonNode nextNode; 
 
@@ -71,20 +71,17 @@ public class TweetStreamIterator implements Iterator<Tweet> {
     iterator = objectMapper.readValues(jsonParser, JsonNode.class);
     this.nested = false;
     this.nestedStatuses = null;
-    this.hasNextNode = this.iterator.hasNext();
-    if (this.hasNextNode) {
-      this.nextNode = this.iterator.next();
-    }
   }
 
   
   @Override
   public boolean hasNext() {
-    /* Using this.iterator.hasNext() did not work for search result format, because
-     * it returns true if there is a JSON node with an empty statuses array.  So we 
-     * have to read ahead a bit in order to let the loop in Population *not* run in
-     * that case (so we can suppress the empty document).  */
-    return (this.hasNextNode && nonEmpty(this.nextNode)) || 
+    /* Suppressing empty documents in Population.populateCorpus is tricky.
+     * So hasNext() returns true if their *could* be more tweets in the 
+     * file, and next() returns null if there are none in the current 
+     * main JsonNode; populateCorpus has to text for null.
+     */
+    return this.iterator.hasNext()  || 
             (this.nested && (this.nestedStatuses != null) && this.nestedStatuses.hasNext());
     // Belt & braces: this.nested should suffice.
   }
@@ -102,29 +99,20 @@ public class TweetStreamIterator implements Iterator<Tweet> {
         this.nested = this.nestedStatuses.hasNext();
       }
       
-      else if (this.hasNext()) {
+      else if (this.iterator.hasNext()) {
+        this.nextNode = this.iterator.next();
+
         if (isSearchResultList(this.nextNode)) {
           this.nestedStatuses = getStatuses(this.nextNode).iterator();
           this.nested = this.nestedStatuses.hasNext();
           // Set the nested flag according as there is anything left
-          // in thee statuses value array (which could be empty).
-        }
-        
-        // Now let's test nested: true IFF we are in a search result thingy AND
-        // the thingy's statuses array is non-empty.
-        if (this.nested) {
-          result = Tweet.readTweet(this.nestedStatuses.next(), contentKeys, featureKeys);
-          // Set the nested flag again for the next call to next()
-          this.nested = this.nestedStatuses.hasNext();
+          // in the statuses value array (which could be empty).
         }
         else {
-          result = Tweet.readTweet(this.nextNode, contentKeys, featureKeys);
+          this.nested = false;
+          this.nestedStatuses = null;
+          result = Tweet.readTweet(nextNode, contentKeys, featureKeys);
         }
-      }
-      
-      if (! this.nested) {
-        hasNextNode = this.iterator.hasNext();
-        nextNode = hasNextNode ? this.iterator.next() : null;
       }
     }
     catch (IOException e) {
