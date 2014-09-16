@@ -98,7 +98,7 @@ import org.apache.tools.ant.types.FileSet;
  * large and small views, etc.
  */
 public class NameBearerHandle implements Handle, StatusListener,
-                             ProgressListener, CreoleListener {
+                             ProgressListener {
 
   public NameBearerHandle(NameBearer target, Window window) {
     this.target = target;
@@ -140,8 +140,6 @@ public class NameBearerHandle implements Handle, StatusListener,
     }    
     
     this.icon = MainFrame.getIcon(iconName);
-
-    Gate.getCreoleRegister().addCreoleListener(this);
 
     if(target instanceof ActionsPublisher)
       actionPublishers.add((ActionsPublisher)target);
@@ -1465,9 +1463,7 @@ public class NameBearerHandle implements Handle, StatusListener,
    */
   @Override
   public void cleanup() {
-
     removeViews();
-    Gate.getCreoleRegister().removeCreoleListener(this);
     target = null;
   }
 
@@ -1547,30 +1543,5 @@ public class NameBearerHandle implements Handle, StatusListener,
   @Override
   public Window getWindow() {
     return window;
-  }
-
-  @Override
-  public void resourceLoaded(CreoleEvent e) {
-  }
-
-  @Override
-  public void resourceUnloaded(CreoleEvent e) {
-  }
-
-  @Override
-  public void resourceRenamed(Resource resource, String oldName, String newName) {
-  }
-
-  @Override
-  public void datastoreOpened(CreoleEvent e) {
-  }
-
-  @Override
-  public void datastoreCreated(CreoleEvent e) {
-  }
-
-  @Override
-  public void datastoreClosed(CreoleEvent e) {
-    if(getTarget() == e.getDatastore()) cleanup();
   }
 }// class DefaultResourceHandle
