@@ -67,6 +67,7 @@ public class XJFileChooser extends JFileChooser {
       @Override
       public void ancestorMoved(AncestorEvent event) { /* do nothing */ }
     });
+    locations = getLocations();
   }
 
   /**
