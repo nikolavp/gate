@@ -61,32 +61,51 @@ import au.com.bytecode.opencsv.CSVReader;
 @CreoleResource(name = "CSV Corpus Populater", tool = true, autoinstances = @AutoInstance, comment = "Populate a corpus from CSV files", helpURL = "http://gate.ac.uk/userguide/sec:creole:csv")
 public class CSVImporter extends ResourceHelper {
 
-  private static JComponent dialog = new JPanel();
+  private static JComponent dialog = null;
 
-  private static SpinnerNumberModel textColModel = new SpinnerNumberModel(0, 0,
-      Integer.MAX_VALUE, 1);
+  private static SpinnerNumberModel textColModel = null;
 
-  private static JCheckBox cboFeatures = new JCheckBox(
-      "1st Row Contains Column Labels", true);
+  private static JCheckBox cboFeatures = null;
 
-  private static JCheckBox cboDocuments = new JCheckBox(
-      "Create One Document Per Row", false);
+  private static JCheckBox cboDocuments = null;
 
-  private static JTextField txtURL = new JTextField(30);
+  private static JTextField txtURL = null;
 
-  private static JTextField txtSeparator = new JTextField(",", 3);
+  private static JTextField txtSeparator = null;
 
-  private static JTextField txtQuoteChar = new JTextField("\"", 3);
+  private static JTextField txtQuoteChar = null;
   
-  private static JTextField txtEncoding = new JTextField("UTF-8");
+  private static JTextField txtEncoding = null;
 
   private static FileFilter CSV_FILE_FILTER = new ExtensionFileFilter(
       "CSV Files (*.csv)", "csv");
 
-  static {
+  private static void buildDialog() {
     // we'll use the same dialog instance regardless of the corpus we are
     // populating so we'll create a single static instance
 
+    if (dialog != null) return;
+    
+    dialog = new JPanel();
+    
+    textColModel = new SpinnerNumberModel(0, 0,
+        Integer.MAX_VALUE, 1);
+    
+    cboFeatures = new JCheckBox(
+        "1st Row Contains Column Labels", true);
+
+    cboDocuments = new JCheckBox(
+        "Create One Document Per Row", false);
+
+    txtURL = new JTextField(30);
+
+    txtSeparator = new JTextField(",", 3);
+
+    txtQuoteChar = new JTextField("\"", 3);
+    
+    txtEncoding = new JTextField("UTF-8");
+
+    
     dialog.setLayout(new GridBagLayout());
 
     GridBagConstraints constraints = new GridBagConstraints();
@@ -226,6 +245,8 @@ public class CSVImporter extends ResourceHelper {
       @Override
       public void actionPerformed(ActionEvent e) {
 
+        buildDialog();
+        
         // display the populater dialog and return if it is cancelled
         if(JOptionPane.showConfirmDialog(null, dialog,
             "Populate From CSV File", JOptionPane.OK_CANCEL_OPTION,
