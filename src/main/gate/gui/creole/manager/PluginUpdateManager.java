@@ -145,7 +145,9 @@ public class PluginUpdateManager extends JDialog {
       "City University Centre for Health Informatics",
       "http://vega.soi.city.ac.uk/~abdy181/software/GATE/gate-update-site.xml",
       "Moonlytics",
-      "http://word-correction-gate-plugin.googlecode.com/svn/trunk/site.xml"};
+      "http://word-correction-gate-plugin.googlecode.com/svn/trunk/site.xml",
+      "SAGA",
+      "http://demos.gsi.dit.upm.es/SAGA/gate-update-site.xml"};
 
   public static File getUserPluginsHome() {
     
