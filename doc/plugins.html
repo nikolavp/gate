@@ -53,7 +53,9 @@ list</a>.</p>
 <li><a href='#Developer_Tools'>Developer_Tools</a></li>
 <li><a href='#DocumentNormalizer'>DocumentNormalizer</a></li>
 <li><a href='#Format_CSV'>Format_CSV</a></li>
+<li><a href='#Format_DataSift'>Format_DataSift</a></li>
 <li><a href='#Format_FastInfoset'>Format_FastInfoset</a></li>
+<li><a href='#Format_HTML5Microdata'>Format_HTML5Microdata</a></li>
 <li><a href='#Format_MediaWiki'>Format_MediaWiki</a></li>
 <li><a href='#Format_PubMed'>Format_PubMed</a></li>
 <li><a href='#Gazetteer_LKB'>Gazetteer_LKB</a></li>
@@ -83,10 +85,10 @@ list</a>.</p>
 <li><a href='#OpenNLP'>OpenNLP</a></li>
 <li><a href='#Parser_Minipar'>Parser_Minipar</a></li>
 <li><a href='#Parser_RASP'>Parser_RASP</a></li>
-<li><a href='#Parser_Stanford'>Parser_Stanford</a></li>
 <li><a href='#Parser_SUPPLE'>Parser_SUPPLE</a></li>
 <li><a href='#Schema_Annotation_Editor'>Schema_Annotation_Editor</a></li>
 <li><a href='#Schema_Tools'>Schema_Tools</a></li>
+<li><a href='#Stanford_CoreNLP'>Stanford_CoreNLP</a></li>
 <li><a href='#Stemmer_Snowball'>Stemmer_Snowball</a></li>
 <li><a href='#Tagger_Abner'>Tagger_Abner</a></li>
 <li><a href='#Tagger_Boilerpipe'>Tagger_Boilerpipe</a></li>
@@ -102,7 +104,6 @@ list</a>.</p>
 <li><a href='#Tagger_Numbers'>Tagger_Numbers</a></li>
 <li><a href='#Tagger_OpenCalais'>Tagger_OpenCalais</a></li>
 <li><a href='#Tagger_PennBio'>Tagger_PennBio</a></li>
-<li><a href='#Tagger_Stanford'>Tagger_Stanford</a></li>
 <li><a href='#Tagger_TextRazor'>Tagger_TextRazor</a></li>
 <li><a href='#Tagger_Zemanta'>Tagger_Zemanta</a></li>
 <li><a href='#Teamware_Tools'>Teamware_Tools</a></li>
@@ -320,6 +321,16 @@ list</a>.</p>
 		<td>gate.creole.EDTMonitor</td>
 	</tr>
 	<tr>
+		<td>Java Heap Dumper&nbsp;</td>
+		<td>Dumps the Java heap to the specified file (<a href="http://gate.ac.uk/userguide/sec:misc-creole:dev-tools">docs</a>)&nbsp;</td>
+		<td>gate.creole.HeapDumper</td>
+	</tr>
+	<tr>
+		<td>Log4J Level: ALL&nbsp;</td>
+		<td>Allows the Log4J log level to be set to ALL from within the GUI (<a href="http://gate.ac.uk/userguide/sec:misc-creole:dev-tools">docs</a>)&nbsp;</td>
+		<td>gate.creole.Log4JALL</td>
+	</tr>
+	<tr>
 		<td>Show/Hide Resources&nbsp;</td>
 		<td>Show resources that would otherwise be hidden, e.g. resources created for internal use by other resources (<a href="http://gate.ac.uk/userguide/sec:misc-creole:dev-tools">docs</a>)&nbsp;</td>
 		<td>gate.creole.Reveal</td>
@@ -328,6 +339,11 @@ list</a>.</p>
 		<td>The Duplicator&nbsp;</td>
 		<td>Duplicate any resource with a right click menu option (<a href="http://gate.ac.uk/userguide/sec:misc-creole:dev-tools">docs</a>)&nbsp;</td>
 		<td>gate.creole.TheDuplicator</td>
+	</tr>
+	<tr>
+		<td>Unload Unused Plugins&nbsp;</td>
+		<td>Unloads all plugins for which we cannot find any loaded instances (<a href="http://gate.ac.uk/userguide/sec:misc-creole:dev-tools">docs</a>)&nbsp;</td>
+		<td>gate.creole.UnusedPluginUnloader</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='DocumentNormalizer'>DocumentNormalizer</a></th>
@@ -346,17 +362,33 @@ list</a>.</p>
 		<td>gate.corpora.CSVImporter</td>
 	</tr>
 	<tr>
+		<th colspan='3'><a name='Format_DataSift'>Format_DataSift</a></th>
+	</tr>
+	<tr>
+		<td>GATE DataSift JSON Document Format&nbsp;</td>
+		<td>Format parser for DataSift JSON files&nbsp;</td>
+		<td>gate.corpora.DataSiftFormat</td>
+	</tr>
+	<tr>
 		<th colspan='3'><a name='Format_FastInfoset'>Format_FastInfoset</a></th>
 	</tr>
 	<tr>
 		<td>Fast Infoset Document Format&nbsp;</td>
-		<td>Format parser for GATE XML stored in the binary FastInfoset format (<a href="http://gate.ac.uk/userguide/sec:creole:fastinfoset">docs</a>)&nbsp;</td>
+		<td>Format parser for GATE XML stored in the binary Fast Infoset format (<a href="http://gate.ac.uk/userguide/sec:creole:fastinfoset">docs</a>)&nbsp;</td>
 		<td>gate.corpora.FastInfosetDocumentFormat</td>
 	</tr>
 	<tr>
 		<td>Fast Infoset Exporter&nbsp;</td>
-		<td>Export GATE documents to GATE XML stored in the binary FastInfoset format (<a href="http://gate.ac.uk/userguide/sec:creole:fastinfoset">docs</a>)&nbsp;</td>
+		<td>Export GATE documents to GATE XML stored in the binary Fast Infoset format (<a href="http://gate.ac.uk/userguide/sec:creole:fastinfoset">docs</a>)&nbsp;</td>
 		<td>gate.corpora.FastInfosetExporter</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Format_HTML5Microdata'>Format_HTML5Microdata</a></th>
+	</tr>
+	<tr>
+		<td>HTML5 Microdata Exporter&nbsp;</td>
+		<td>Exports Annotations as HTML5 Microdata&nbsp;</td>
+		<td>gate.creole.microdata.MicrodataExporter</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Format_MediaWiki'>Format_MediaWiki</a></th>
@@ -928,24 +960,6 @@ list</a>.</p>
 		<td>com.digitalpebble.rasp2.parser.ParserAnnotator</td>
 	</tr>
 	<tr>
-		<th colspan='3'><a name='Parser_Stanford'>Parser_Stanford</a></th>
-	</tr>
-	<tr>
-		<td>StanfordParser&nbsp;</td>
-		<td>Stanford parser wrapper (<a href="http://gate.ac.uk/userguide/sec:parsers:stanford">docs</a>)&nbsp;</td>
-		<td>gate.stanford.Parser</td>
-	</tr>
-	<tr>
-		<td>English Dependency Parser&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>gate.stanford.apps.EnglishDependencies</td>
-	</tr>
-	<tr>
-		<td>English POS Tagger and Dependency Parser&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>gate.stanford.apps.EnglishPOSDependencies</td>
-	</tr>
-	<tr>
 		<th colspan='3'><a name='Parser_SUPPLE'>Parser_SUPPLE</a></th>
 	</tr>
 	<tr>
@@ -973,6 +987,39 @@ list</a>.</p>
 		<td>Simple Schema Viewer&nbsp;</td>
 		<td>A Simple Annotation Schema Viewer&nbsp;</td>
 		<td>gate.gui.schema.SimpleSchemaViewer</td>
+	</tr>
+	<tr>
+		<th colspan='3'><a name='Stanford_CoreNLP'>Stanford_CoreNLP</a></th>
+	</tr>
+	<tr>
+		<td>Stanford NER&nbsp;</td>
+		<td>Stanford Named Entity Recogniser (<a href="http://gate.ac.uk/userguide/sec:misc:creole:stanford">docs</a>)&nbsp;</td>
+		<td>gate.stanford.NER</td>
+	</tr>
+	<tr>
+		<td>StanfordParser&nbsp;</td>
+		<td>Stanford parser wrapper (<a href="http://gate.ac.uk/userguide/sec:parsers:stanford">docs</a>)&nbsp;</td>
+		<td>gate.stanford.Parser</td>
+	</tr>
+	<tr>
+		<td>Stanford POS Tagger&nbsp;</td>
+		<td>Stanford Part-of-Speech Tagger (<a href="http://gate.ac.uk/userguide/sec:misc:creole:stanford">docs</a>)&nbsp;</td>
+		<td>gate.stanford.Tagger</td>
+	</tr>
+	<tr>
+		<td>Stanford PTB Tokenizer&nbsp;</td>
+		<td>Stanford Penn Treebank v3 Tokenizer, for English (<a href="http://gate.ac.uk/userguide/sec:misc:creole:stanford">docs</a>)&nbsp;</td>
+		<td>gate.stanford.Tokenizer</td>
+	</tr>
+	<tr>
+		<td>English Dependency Parser&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>gate.stanford.apps.EnglishDependencies</td>
+	</tr>
+	<tr>
+		<td>English POS Tagger and Dependency Parser&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>gate.stanford.apps.EnglishPOSDependencies</td>
 	</tr>
 	<tr>
 		<th colspan='3'><a name='Stemmer_Snowball'>Stemmer_Snowball</a></th>
@@ -1140,14 +1187,6 @@ list</a>.</p>
 		<td>gate.creole.pennbio.VariationTagger</td>
 	</tr>
 	<tr>
-		<th colspan='3'><a name='Tagger_Stanford'>Tagger_Stanford</a></th>
-	</tr>
-	<tr>
-		<td>Stanford POS Tagger&nbsp;</td>
-		<td>Stanford Part-of-Speech Tagger (<a href="http://gate.ac.uk/userguide/sec:misc:creole:stanford">docs</a>)&nbsp;</td>
-		<td>gate.stanford.Tagger</td>
-	</tr>
-	<tr>
 		<th colspan='3'><a name='Tagger_TextRazor'>Tagger_TextRazor</a></th>
 	</tr>
 	<tr>
@@ -1289,6 +1328,11 @@ list</a>.</p>
 		<td>gate.corpora.JSONTweetFormat</td>
 	</tr>
 	<tr>
+		<td>GATE JSON Exporter&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>gate.corpora.export.GATEJsonExporter</td>
+	</tr>
+	<tr>
 		<td>Twitter Corpus Populator&nbsp;</td>
 		<td>Populate a corpus from Twitter JSON containing multiple Tweets (<a href="http://gate.ac.uk/userguide/sec:social:twitter:format">docs</a>)&nbsp;</td>
 		<td>gate.corpora.twitter.Population</td>
@@ -1360,6 +1404,7 @@ list</a>.</p>
 	<li><a href='#OrganismTagger'>OrganismTagger</a></li>	
 	<li><a href='#munpex'>Multi-lingual Noun Phrase Extractor (MuNPEx)</a></li>
 	<li><a href='#durm'>Durm German lemmatizer</a></li> 
+	<li><a href='#S4'>S4 Annotator</a></li>	
 	<li><a href='#anc'>XCES tools</a></li>
 	<li><a href='#sen'><i>Sen</i> wrapper (Japanese morphological analyser)</a></li>
 	<li><a href='#russianprs'>Russian morph tagger</a></li>
@@ -1409,6 +1454,22 @@ list</a>.</p>
 		<td>The Durm German Lemmatization System consists of a number of GATE components and resources that perform morphological analysis and lemmatization for German nouns.
 </td>
 		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+		<th colspan='3'><a name="S4"></a>GATE Plugin for <a href="https://console.s4.ontotext.com">S4</a><br/><a
+                href="http://docs.s4.ontotext.com/display/S4docs/GATE+Plugin+for+S4">website</a> (download via the <a href="http://docs.s4.ontotext.com/display/S4docs/GATE+Plugin+for+S4#GATEPluginforS4-DownloadingviatheCREOLEPluginManager">update site</a>)</th>
+	</tr>
+	<tr>
+		<td>S4 Annotator</td>
+                <td>Provides access to the text analytics services of
+                Ontotext's Self Service Semantic Suite (S4) directly from the
+                GATE platform, via their RESTful APIs.  The PR can be
+                integrated in any GATE processing pipeline regardless of the
+                context and it does not have any requirements or assumptions
+                about the type of pre-processing or post-processing of the
+                textual data being annotated.</td>
+		<td>com.ontotext.s4.api.S4Plugin</td>
 	</tr>
 
 	<tr>
