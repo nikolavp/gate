@@ -102,6 +102,11 @@ public class NLPFeaturesList {
   public void addFeaturesFromDoc(NLPFeaturesOfDoc fd) {
     long size = featuresList.size();
     for(int i = 0; i < fd.numInstances; ++i) {
+      
+      //added a fix for a line without enough n-grams, for details see
+      //http://sourceforge.net/p/gate/mailman/message/26934934/
+      if (fd.featuresInLine[i]==null) continue;
+      
       String[] features = fd.featuresInLine[i].toString().trim().split(
         ConstantParameters.ITEMSEPARATOR);
       for(int j = 0; j < features.length; ++j) {
