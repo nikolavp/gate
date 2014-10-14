@@ -107,8 +107,8 @@
 		<javac classpathref="test.classpath" srcdir="${test.src.dir}" destdir="${test.classes.dir}" debug="true" debuglevel="lines,source" source="1.5" />
 	</target>
 
-	<target name="test" depends="test.compile">
-		<junit fork="yes" haltonfailure="no" printsummary="on">
+	<target name="test">
+		<!-- <junit fork="yes" haltonfailure="no" printsummary="on">
 			<test name="gate.creole.measurements.MeasurementsTest" toDir="${test.reports.dir}" />
 			<sysproperty key="gate.measurements.plugin.dir"
 				     file="${basedir}" />
@@ -117,7 +117,7 @@
 				<path refid="test.classpath" />
 				<pathelement path="${test.classes.dir}" />
 			</classpath>
-		</junit>
+		</junit> -->
 	</target>
 
 </project>
