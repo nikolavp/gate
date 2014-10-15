@@ -1,3 +1,16 @@
+/*
+ * ExportSimplifiedText.java
+ *
+ * Copyright (c) 2004-2014, The University of Sheffield.
+ * 
+ * This file is part of GATE (see http://gate.ac.uk/), and is free software,
+ * Licensed under the GNU Library General Public License, Version 3, June 2007
+ * (in the distribution as file licence.html, and also available at
+ * http://gate.ac.uk/gate/licence.html).
+ * 
+ * Mark A. Greenwood, 2014
+ */
+
 package gate.corpora.export;
 
 import gate.Annotation;

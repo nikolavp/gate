@@ -1,7 +1,7 @@
 /*
  * Simplifier.java
  *
- * Copyright (c) 2004-2013, The University of Sheffield.
+ * Copyright (c) 2004-2014, The University of Sheffield.
  * 
  * This file is part of GATE (see http://gate.ac.uk/), and is free software,
  * Licensed under the GNU Library General Public License, Version 3, June 2007
