@@ -41,7 +41,7 @@ public class TweetUtils  {
   public static final String[] DEFAULT_CONTENT_KEYS = {DEFAULT_TEXT_ATTRIBUTE, 
     "created_at", "user:name"};
   public static final String[] DEFAULT_FEATURE_KEYS = {"user:screen_name", 
-    "user:location", "id", "source", "truncated", "retweeted_status:id"};
+    "user:location", "id_str", "source", "truncated", "retweeted_status:id"};
 
   
   public static List<Tweet> readTweets(String string) throws IOException {
