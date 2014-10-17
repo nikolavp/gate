@@ -173,7 +173,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
 
   /**
    * Select annotations by offset and type. This returns the set of
-   * annotations that overlap totaly or partially the interval defined
+   * annotations that overlap totally or partially the interval defined
    * by the two provided offsets and are of the given type. This method
    * is effectively a combination of {@link #get(Long, Long)} and
    * {@link SimpleAnnotationSet#get(String)} but may admit more
@@ -189,7 +189,7 @@ public interface AnnotationSet extends SimpleAnnotationSet, Serializable {
   public AnnotationSet get(String type, Long startOffset, Long endOffset);
 
   /**
-   * Select annotations of the given type that complete span the range.
+   * Select annotations of the given type that completely span the range.
    * Formally, for any annotation a, a will be included in the return
    * set if:
    * <ul>
