@@ -33,10 +33,8 @@ import java.util.List;
 
 import javax.swing.Action;
 
-@CreoleResource(name = "Entity Annotation Job Builder",
-    comment = "Build a CrowdFlower job asking users to annotate entities "
-       + "within a snippet of text",
-    helpURL = "http://gate.ac.uk/userguide/sec:crowd:annotation")
+@CreoleResource(name = "Entity Annotation Job Builder", comment = "Build a CrowdFlower job asking users to annotate entities "
+        + "within a snippet of text", helpURL = "http://gate.ac.uk/userguide/sec:crowd:annotation")
 public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser
                                                                         implements
                                                                         ActionsPublisher {
@@ -66,6 +64,8 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser
   private String entityAnnotationType;
 
   private String entityASName;
+
+  private Boolean skipExisting;
 
   protected CrowdFlowerClient crowdFlowerClient;
 
@@ -203,6 +203,18 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser
     this.goldReasonFeatureName = goldReasonFeatureName;
   }
 
+  public Boolean getSkipExisting() {
+    return skipExisting;
+  }
+
+  @Optional
+  @RunTime
+  @CreoleParameter(defaultValue = "true", comment = "Should we skip snippets that already "
+          + "have a feature indicating that they have been processed before?")
+  public void setSkipExisting(Boolean skipExisting) {
+    this.skipExisting = skipExisting;
+  }
+
   @Override
   public Resource init() throws ResourceInstantiationException {
     if(apiKey == null || "".equals(apiKey)) {
@@ -240,6 +252,13 @@ public class EntityAnnotationJobBuilder extends AbstractLanguageAnalyser
       for(Annotation snippet : allSnippets) {
         fireProgressChanged((100 * snippetIdx++) / allSnippets.size());
         if(isInterrupted()) throw new ExecutionInterruptedException();
+        // skip existing units, if so configured
+        if(skipExisting != null
+                && skipExisting.booleanValue()
+                && snippet.getFeatures().containsKey(
+                        entityAnnotationType + "_unit_id")) {
+          continue;
+        }
         AnnotationSet snippetTokens =
                 Utils.getContainedAnnotations(tokens, snippet);
         String detail = null;

@@ -36,29 +36,34 @@ import gate.creole.metadata.RunTime;
 import gate.crowdsource.rest.CrowdFlowerClient;
 import gate.gui.ActionsPublisher;
 
+import static gate.crowdsource.CrowdFlowerConstants.UNIT_ID_FEATURE_NAME;
+
 import org.apache.log4j.Logger;
 
-@CreoleResource(name = "Entity Classification Job Builder",
-   comment = "Build a CrowdFlower job asking users to select the right label for entities",
-   helpURL = "http://gate.ac.uk/userguide/sec:crowd:classification")
-public class EntityClassificationJobBuilder extends AbstractLanguageAnalyser implements ActionsPublisher {
+@CreoleResource(name = "Entity Classification Job Builder", comment = "Build a CrowdFlower job asking users to select the right label for entities", helpURL = "http://gate.ac.uk/userguide/sec:crowd:classification")
+public class EntityClassificationJobBuilder extends AbstractLanguageAnalyser
+                                                                            implements
+                                                                            ActionsPublisher {
 
-  private static final Logger log = Logger.getLogger(EntityClassificationJobBuilder.class);
+  private static final Logger log = Logger
+          .getLogger(EntityClassificationJobBuilder.class);
 
   private static final long serialVersionUID = -1584716901194104888L;
 
   private String apiKey;
-  
+
   private Long jobId;
-  
+
   private String contextAnnotationType;
-  
+
   private String contextASName;
-  
+
   private String entityAnnotationType;
-  
+
   private String entityASName;
-  
+
+  private Boolean skipExisting;
+
   protected CrowdFlowerClient crowdFlowerClient;
 
   public String getApiKey() {
@@ -122,6 +127,18 @@ public class EntityClassificationJobBuilder extends AbstractLanguageAnalyser imp
     this.entityASName = entityASName;
   }
 
+  public Boolean getSkipExisting() {
+    return skipExisting;
+  }
+
+  @Optional
+  @RunTime
+  @CreoleParameter(defaultValue = "true", comment = "Should we skip snippets that already "
+          + "have a feature indicating that they have been processed before?")
+  public void setSkipExisting(Boolean skipExisting) {
+    this.skipExisting = skipExisting;
+  }
+
   @Override
   public Resource init() throws ResourceInstantiationException {
     if(apiKey == null || "".equals(apiKey)) {
@@ -139,30 +156,45 @@ public class EntityClassificationJobBuilder extends AbstractLanguageAnalyser imp
       if(jobId == null || jobId.longValue() <= 0) {
         throw new ExecutionException("Job ID must be provided");
       }
-      
+
       AnnotationSet entityAS = getDocument().getAnnotations(entityASName);
-      AnnotationSet contextAnnotations = getDocument().getAnnotations(contextASName)
-              .get(contextAnnotationType);
-      
-      List<Annotation> allEntities = Utils.inDocumentOrder(entityAS.get(entityAnnotationType));
-      fireStatusChanged("Creating CrowdFlower units for " + allEntities.size() + " "
-              + entityAnnotationType + " annotations for classification task ");
+      AnnotationSet contextAnnotations =
+              getDocument().getAnnotations(contextASName).get(
+                      contextAnnotationType);
+
+      List<Annotation> allEntities =
+              Utils.inDocumentOrder(entityAS.get(entityAnnotationType));
+      fireStatusChanged("Creating CrowdFlower units for " + allEntities.size()
+              + " " + entityAnnotationType
+              + " annotations for classification task ");
 
       int entityIdx = 0;
       for(Annotation entity : allEntities) {
         fireProgressChanged((100 * entityIdx++) / allEntities.size());
         if(isInterrupted()) throw new ExecutionInterruptedException();
-        AnnotationSet thisEntityContext = Utils.getCoveringAnnotations(contextAnnotations, entity);
+        // skip existing units, if so configured
+        if(skipExisting != null && skipExisting.booleanValue()
+                && entity.getFeatures().containsKey(UNIT_ID_FEATURE_NAME)) {
+          continue;
+        }
+
+        AnnotationSet thisEntityContext =
+                Utils.getCoveringAnnotations(contextAnnotations, entity);
         if(thisEntityContext.isEmpty()) {
-          log.warn(entityAnnotationType + " with ID " + entity.getId() +
-              " at offsets (" + Utils.start(entity) + ":" + Utils.end(entity) +
-              ") in document " + getDocument().getName() + 
-              " has no surrounding " + contextAnnotationType + " - ignored");
+          log.warn(entityAnnotationType + " with ID " + entity.getId()
+                  + " at offsets (" + Utils.start(entity) + ":"
+                  + Utils.end(entity) + ") in document "
+                  + getDocument().getName() + " has no surrounding "
+                  + contextAnnotationType + " - ignored");
         } else {
-          // get the "closest" context, i.e. the shortest annotation in the covering set.
+          // get the "closest" context, i.e. the shortest annotation in
+          // the covering set.
           // usually we'd expect this set to contain just one annotation
-          Annotation context = Collections.min(thisEntityContext, ANNOTATION_LENGTH_COMPARATOR);
-          crowdFlowerClient.createClassificationUnit(jobId, getDocument(), entityASName, context, entity);
+          Annotation context =
+                  Collections.min(thisEntityContext,
+                          ANNOTATION_LENGTH_COMPARATOR);
+          crowdFlowerClient.createClassificationUnit(jobId, getDocument(),
+                  entityASName, context, entity);
         }
       }
       fireProcessFinished();
@@ -171,15 +203,16 @@ public class EntityClassificationJobBuilder extends AbstractLanguageAnalyser imp
       interrupted = false;
     }
   }
-  
-  private static final Comparator<Annotation> ANNOTATION_LENGTH_COMPARATOR = new Comparator<Annotation>() {
-    public int compare(Annotation a1, Annotation a2) {
-      return Utils.length(a1) - Utils.length(a2);
-    }
-  };
-  
+
+  private static final Comparator<Annotation> ANNOTATION_LENGTH_COMPARATOR =
+          new Comparator<Annotation>() {
+            public int compare(Annotation a1, Annotation a2) {
+              return Utils.length(a1) - Utils.length(a2);
+            }
+          };
+
   private List<Action> actions = null;
-  
+
   public List<Action> getActions() {
     if(actions == null) {
       actions = new ArrayList<Action>();
