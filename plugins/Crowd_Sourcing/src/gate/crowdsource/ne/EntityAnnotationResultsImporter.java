@@ -204,7 +204,7 @@ public class EntityAnnotationResultsImporter
             for(JsonElement judgmentElt : judgments) {
               JsonObject judgment = judgmentElt.getAsJsonObject();
               JsonObject data = judgment.getAsJsonObject("data");
-              JsonArray answer = data.get("answer").getAsJsonArray();
+              JsonArray answer = data.getAsJsonArray("answer");
               Long judgmentId = judgment.get("id").getAsLong();
               Double trust = judgment.get("trust").getAsDouble();
               Long workerId = judgment.get("worker_id").getAsLong();
@@ -217,7 +217,7 @@ public class EntityAnnotationResultsImporter
                   }
                 }
               }
-              if(answer.size() > 0) {
+              if(answer != null && answer.size() > 0) {
                 // judgment says there are some entities to annotate.  Look for
                 // sequences of consecutive token indices and create one result
                 // annotation for each such sequence
