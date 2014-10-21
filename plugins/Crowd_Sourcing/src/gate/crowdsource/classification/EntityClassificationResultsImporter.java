@@ -35,8 +35,9 @@ import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.crowdsource.rest.CrowdFlowerClient;
 
-@CreoleResource(name = "Entity Classification Results Importer", comment = "Import judgments from a CrowdFlower job created by "
-        + "the Entity Classification Job Builder as GATE annotations.",
+@CreoleResource(name = "Entity Classification Results Importer",
+    comment = "Import judgments from a CrowdFlower job created by "
+            + "the Entity Classification Job Builder as GATE annotations.",
     helpURL = "http://gate.ac.uk/userguide/sec:crowd:classification:import")
 public class EntityClassificationResultsImporter
                                                 extends
@@ -58,6 +59,8 @@ public class EntityClassificationResultsImporter
   private String resultAnnotationType;
 
   private String resultASName;
+
+  private String answerFeatureName;
 
   protected CrowdFlowerClient crowdFlowerClient;
 
@@ -122,6 +125,18 @@ public class EntityClassificationResultsImporter
     this.resultASName = resultASName;
   }
 
+  public String getAnswerFeatureName() {
+    return answerFeatureName;
+  }
+
+  @Optional
+  @RunTime
+  @CreoleParameter(defaultValue = "answer")
+  public void setAnswerFeatureName(String answerFeatureName) {
+    this.answerFeatureName = answerFeatureName;
+  }
+
+  
   @Override
   public Resource init() throws ResourceInstantiationException {
     if(apiKey == null || "".equals(apiKey)) {
@@ -160,14 +175,14 @@ public class EntityClassificationResultsImporter
             for(JsonElement judgmentElt : judgments) {
               JsonObject judgment = judgmentElt.getAsJsonObject();
               JsonObject data = judgment.getAsJsonObject("data");
-              String answer = data.get("answer").getAsString();
+              String answer = data.get(answerFeatureName).getAsString();
               long judgmentId = judgment.get("id").getAsLong();
               double trust = judgment.get("trust").getAsDouble();
               long workerId = judgment.get("worker_id").getAsLong();
               Annotation judgmentAnn =
                       findOrCreate(resultAS, existingJudgments, judgmentId,
                               entity);
-              judgmentAnn.getFeatures().put("answer", answer);
+              judgmentAnn.getFeatures().put(answerFeatureName, answer);
               judgmentAnn.getFeatures().put("trust", Double.valueOf(trust));
               judgmentAnn.getFeatures()
                       .put("worker_id", Long.valueOf(workerId));
