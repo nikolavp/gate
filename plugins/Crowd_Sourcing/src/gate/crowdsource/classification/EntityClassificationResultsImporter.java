@@ -175,7 +175,7 @@ public class EntityClassificationResultsImporter
             for(JsonElement judgmentElt : judgments) {
               JsonObject judgment = judgmentElt.getAsJsonObject();
               JsonObject data = judgment.getAsJsonObject("data");
-              String answer = data.get(answerFeatureName).getAsString();
+              String answer = data.get("answer").getAsString();
               long judgmentId = judgment.get("id").getAsLong();
               double trust = judgment.get("trust").getAsDouble();
               long workerId = judgment.get("worker_id").getAsLong();
