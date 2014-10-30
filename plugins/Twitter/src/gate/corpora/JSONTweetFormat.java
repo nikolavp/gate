@@ -17,6 +17,7 @@ import gate.GateConstants;
 import gate.Resource;
 import gate.corpora.twitter.PreAnnotation;
 import gate.corpora.twitter.Tweet;
+import gate.corpora.twitter.TweetStreamIterator;
 import gate.corpora.twitter.TweetUtils;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
@@ -25,6 +26,8 @@ import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
@@ -87,12 +90,13 @@ public class JSONTweetFormat extends TextualDocumentFormat {
     String jsonString = StringUtils.trimToEmpty(doc.getContent().toString());
     try {
       // Parse the String
-      List<Tweet> tweets = TweetUtils.readTweets(jsonString);
-      Map<Tweet, Long> tweetStarts = new HashMap<Tweet, Long>();
+      Iterator<Tweet> tweetSource = new TweetStreamIterator(jsonString, null, null);
+      Map<Tweet, Long> tweetStarts = new LinkedHashMap<Tweet, Long>();
       
       // Put them all together to make the unpacked document content
       StringBuilder concatenation = new StringBuilder();
-      for (Tweet tweet : tweets) {
+      while(tweetSource.hasNext()) {
+        Tweet tweet = tweetSource.next();
         tweetStarts.put(tweet, (long) concatenation.length());
         concatenation.append(tweet.getString()).append("\n\n");
       }
@@ -103,7 +107,7 @@ public class JSONTweetFormat extends TextualDocumentFormat {
 
       AnnotationSet originalMarkups = doc.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
       // Create Original markups annotations for each tweet
-      for (Tweet tweet : tweets) {
+      for (Tweet tweet : tweetStarts.keySet()) {
         for (PreAnnotation preAnn : tweet.getAnnotations()) {
           preAnn.toAnnotation(originalMarkups, tweetStarts.get(tweet));
         }

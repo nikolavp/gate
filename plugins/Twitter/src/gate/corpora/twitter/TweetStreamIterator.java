@@ -41,9 +41,17 @@ public class TweetStreamIterator implements Iterator<Tweet> {
   private List<String> contentKeys, featureKeys;
   private boolean nested;
   private Iterator<JsonNode> nestedStatuses;
-  private JsonNode nextNode; 
-
-
+  private JsonNode nextNode;
+  
+  public TweetStreamIterator(String json, List<String> contentKeys, 
+          List<String> featureKeys) throws JsonParseException, IOException {
+    this.contentKeys = contentKeys;
+    this.featureKeys = featureKeys;
+    objectMapper = new ObjectMapper();
+    jsonParser = objectMapper.getFactory().createParser(json);
+    init();
+  }
+  
   public TweetStreamIterator(InputStream input, List<String> contentKeys, 
           List<String> featureKeys, boolean gzip) throws JsonParseException, IOException {
     this.contentKeys = contentKeys;
@@ -61,6 +69,10 @@ public class TweetStreamIterator implements Iterator<Tweet> {
     }
     
     jsonParser = objectMapper.getFactory().createParser(workingInput).enable(Feature.AUTO_CLOSE_SOURCE);
+    init();
+  }
+
+  private void init() throws JsonParseException, IOException {
     // If the first token in the stream is the start of an array ("[")
     // then assume the stream as a whole is an array of objects
     // To handle this, simply clear the token - The MappingIterator
@@ -72,7 +84,6 @@ public class TweetStreamIterator implements Iterator<Tweet> {
     this.nested = false;
     this.nestedStatuses = null;
   }
-
   
   @Override
   public boolean hasNext() {
