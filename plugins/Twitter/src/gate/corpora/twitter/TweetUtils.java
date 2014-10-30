@@ -42,6 +42,11 @@ public class TweetUtils  {
     "created_at", "user:name"};
   public static final String[] DEFAULT_FEATURE_KEYS = {"user:screen_name", 
     "user:location", "id_str", "source", "truncated", "retweeted_status:id"};
+  
+  /**
+   * The JSON property representing entities (e.g. hashtags).
+   */
+  public static final String ENTITIES_ATTRIBUTE = "entities";
 
   
   public static List<Tweet> readTweets(String string) throws IOException {

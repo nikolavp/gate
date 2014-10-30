@@ -18,9 +18,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.StringEscapeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 public class Tweet {
@@ -51,12 +53,16 @@ public class Tweet {
   
   
   public static Tweet readTweet(JsonNode json, List<String> contentKeys, List<String> featureKeys) {
+    return readTweet(json, contentKeys, featureKeys, true);
+  }
+  
+  public static Tweet readTweet(JsonNode json, List<String> contentKeys, List<String> featureKeys, boolean handleEntities) {
     if ( (contentKeys == null) || (featureKeys == null) ) {
-      return new Tweet(json);
+      return new Tweet(json, handleEntities);
     }
 
     // implied else
-    return new Tweet(json, contentKeys, featureKeys);
+    return new Tweet(json, contentKeys, featureKeys, handleEntities);
   }
 
 
@@ -64,7 +70,7 @@ public class Tweet {
    * Used by the JSONTWeetFormat; the DocumentContent contains only the main text;
    * the annotation feature map contains all the other JSON data, recursively.
    */
-  private Tweet(JsonNode json) {
+  private Tweet(JsonNode json, boolean handleEntities) {
     string = "";
     Iterator<String> keys = json.fieldNames();
     FeatureMap features = Factory.newFeatureMap();
@@ -75,6 +81,7 @@ public class Tweet {
 
       if (key.equals(TweetUtils.DEFAULT_TEXT_ATTRIBUTE)) {
         string = StringEscapeUtils.unescapeHtml(json.get(key).asText());
+        processEntities(json, 0L);
       }
       else {
         features.put(key.toString(), TweetUtils.process(json.get(key)));
@@ -91,7 +98,7 @@ public class Tweet {
    * @param featureKeys JSON paths whose values should be stored in the main
    * annotation's features
    */
-  private Tweet(JsonNode json, List<String> contentKeys, List<String> featureKeys) {
+  private Tweet(JsonNode json, List<String> contentKeys, List<String> featureKeys, boolean handleEntities) {
     StringBuilder content = new StringBuilder();
     List<String> keepers = new ArrayList<String>();
     keepers.addAll(contentKeys);
@@ -107,6 +114,10 @@ public class Tweet {
         // Use GATE's String conversion in case there are maps or lists.
         content.append(Strings.toString(featuresFound.get(cKey)));
         this.annotations.add(new PreAnnotation(start, content.length(), cKey));
+        if(handleEntities && TweetUtils.DEFAULT_TEXT_ATTRIBUTE.equals(cKey)) {
+          // only process entities within "text"
+          processEntities(json, start);
+        }
         content.append('\n');
       }
     }
@@ -124,5 +135,45 @@ public class Tweet {
     this.string = content.toString();
   }
 
+  /**
+   * Process the "entities" property of this json object into annotations,
+   * shifting their offsets by the specified amount.
+   * 
+   * @param json the Tweet json object
+   * @param startOffset offset correction if the text is not the first of
+   *         the content keys.
+   */
+  private void processEntities(JsonNode json, long startOffset) {
+    JsonNode entitiesNode = json.get(TweetUtils.ENTITIES_ATTRIBUTE);
+    if(entitiesNode == null || !entitiesNode.isObject()) {
+      // no entities, nothing to do
+      return;
+    }
+    Iterator<String> entityTypes = entitiesNode.fieldNames();
+    while(entityTypes.hasNext()) {
+      String entityType = entityTypes.next();
+      JsonNode entitiesOfType = entitiesNode.get(entityType);
+      if(entitiesOfType != null && entitiesOfType.isArray() && entitiesOfType.size() > 0) {
+        Iterator<JsonNode> it = entitiesOfType.elements();
+        while(it.hasNext()) {
+          JsonNode entity = it.next();
+          if(entity.isObject()) {
+            // process is guaranteed to return a FeatureMap given an object
+            FeatureMap features = (FeatureMap)TweetUtils.process(entity);
+            Object indices = features.get("indices");
+            if(indices != null && indices instanceof List<?>) {
+              List<?> indicesList = (List<?>)indices;
+              if(indicesList.get(0) instanceof Number && indicesList.get(1) instanceof Number) {
+                // finally we know we have a valid entity
+                features.remove("indices");
+                annotations.add(new PreAnnotation(startOffset + ((Number)indicesList.get(0)).longValue(),
+                        startOffset + ((Number)indicesList.get(1)).longValue(), entityType, features));
+              }
+            }
+          }
+        }
+      }
+    }
+  }
   
 }

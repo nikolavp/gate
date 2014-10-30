@@ -42,11 +42,19 @@ public class TweetStreamIterator implements Iterator<Tweet> {
   private boolean nested;
   private Iterator<JsonNode> nestedStatuses;
   private JsonNode nextNode;
+  private boolean handleEntities;
   
   public TweetStreamIterator(String json, List<String> contentKeys, 
           List<String> featureKeys) throws JsonParseException, IOException {
+    this(json, contentKeys, featureKeys, true);
+  }
+  
+  
+  public TweetStreamIterator(String json, List<String> contentKeys, 
+          List<String> featureKeys, boolean handleEntities) throws JsonParseException, IOException {
     this.contentKeys = contentKeys;
     this.featureKeys = featureKeys;
+    this.handleEntities = handleEntities;
     objectMapper = new ObjectMapper();
     jsonParser = objectMapper.getFactory().createParser(json);
     init();
@@ -54,8 +62,15 @@ public class TweetStreamIterator implements Iterator<Tweet> {
   
   public TweetStreamIterator(InputStream input, List<String> contentKeys, 
           List<String> featureKeys, boolean gzip) throws JsonParseException, IOException {
+    this(input, contentKeys, featureKeys, gzip, true);
+  }
+  
+  public TweetStreamIterator(InputStream input, List<String> contentKeys, 
+          List<String> featureKeys, boolean gzip, boolean handleEntities)
+                  throws JsonParseException, IOException {
     this.contentKeys = contentKeys;
     this.featureKeys = featureKeys;
+    this.handleEntities = handleEntities;
     InputStream workingInput;
     
     // Following borrowed from gcp JSONStreamingInputHandler
@@ -103,7 +118,7 @@ public class TweetStreamIterator implements Iterator<Tweet> {
     Tweet result = null;
     try {
       if (this.nested && this.nestedStatuses.hasNext()) {
-        result = Tweet.readTweet(this.nestedStatuses.next(), contentKeys, featureKeys);
+        result = Tweet.readTweet(this.nestedStatuses.next(), contentKeys, featureKeys, handleEntities);
         // Clear the nested flag once the last item in the statuses
         // value's list has been used, so that the next call to next()
         // will drop to the else if clause.
@@ -122,7 +137,7 @@ public class TweetStreamIterator implements Iterator<Tweet> {
         else {
           this.nested = false;
           this.nestedStatuses = null;
-          result = Tweet.readTweet(nextNode, contentKeys, featureKeys);
+          result = Tweet.readTweet(nextNode, contentKeys, featureKeys, handleEntities);
         }
       }
     }

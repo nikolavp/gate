@@ -75,7 +75,8 @@ public class Population extends ResourceHelper  {
       input = inputUrl.openStream();
       
       // TODO Detect & handle gzipped input.
-      TweetStreamIterator tweetSource = new TweetStreamIterator(input, contentKeys, featureKeys, false);
+      // TODO handling of entities, once there's GUI to control it
+      TweetStreamIterator tweetSource = new TweetStreamIterator(input, contentKeys, featureKeys, false, false);
 
       int tweetCounter = 0;
       int tweetDocCounter = 0;
