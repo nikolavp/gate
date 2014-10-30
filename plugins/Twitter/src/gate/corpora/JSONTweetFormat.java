@@ -97,8 +97,13 @@ public class JSONTweetFormat extends TextualDocumentFormat {
       StringBuilder concatenation = new StringBuilder();
       while(tweetSource.hasNext()) {
         Tweet tweet = tweetSource.next();
-        tweetStarts.put(tweet, (long) concatenation.length());
-        concatenation.append(tweet.getString()).append("\n\n");
+        if(tweet != null) {
+          // TweetStreamIterator can return null even when hasNext is true,
+          // for search result style JSON.  This is not a problem, just ignore
+          // and check hasNext again.
+          tweetStarts.put(tweet, (long) concatenation.length());
+          concatenation.append(tweet.getString()).append("\n\n");
+        }
       }
 
       // Set new document content 
