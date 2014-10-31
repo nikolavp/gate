@@ -154,6 +154,8 @@ public class Tweet {
       String entityType = entityTypes.next();
       JsonNode entitiesOfType = entitiesNode.get(entityType);
       if(entitiesOfType != null && entitiesOfType.isArray() && entitiesOfType.size() > 0) {
+        // if the entityType is X:Y then assume X is the AS name and Y is the actual type
+        String[] setAndType = entityType.split(":", 2);
         Iterator<JsonNode> it = entitiesOfType.elements();
         while(it.hasNext()) {
           JsonNode entity = it.next();
@@ -166,8 +168,14 @@ public class Tweet {
               if(indicesList.get(0) instanceof Number && indicesList.get(1) instanceof Number) {
                 // finally we know we have a valid entity
                 features.remove("indices");
-                annotations.add(new PreAnnotation(startOffset + ((Number)indicesList.get(0)).longValue(),
-                        startOffset + ((Number)indicesList.get(1)).longValue(), entityType, features));
+                long annStart = startOffset + ((Number)indicesList.get(0)).longValue();
+                long annEnd = startOffset + ((Number)indicesList.get(1)).longValue();
+                if(setAndType.length == 2) {
+                  // explicit annotation set name
+                  annotations.add(new PreAnnotation(annStart, annEnd, setAndType[0], setAndType[1], features));
+                } else {
+                  annotations.add(new PreAnnotation(annStart, annEnd, entityType, features));
+                }
               }
             }
           }

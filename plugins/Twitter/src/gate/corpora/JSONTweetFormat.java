@@ -110,11 +110,10 @@ public class JSONTweetFormat extends TextualDocumentFormat {
       DocumentContent newContent = new DocumentContentImpl(concatenation.toString());
       doc.edit(0L, doc.getContent().size(), newContent);
 
-      AnnotationSet originalMarkups = doc.getAnnotations(GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
       // Create Original markups annotations for each tweet
       for (Tweet tweet : tweetStarts.keySet()) {
         for (PreAnnotation preAnn : tweet.getAnnotations()) {
-          preAnn.toAnnotation(originalMarkups, tweetStarts.get(tweet));
+          preAnn.toAnnotation(doc, tweetStarts.get(tweet));
         }
       }
     }

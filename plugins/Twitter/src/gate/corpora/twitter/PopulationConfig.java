@@ -31,9 +31,12 @@ import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 
 public class PopulationConfig   {
+  public static final String RESOURCE_CODE = "twitter.population.config";
+
   private String encoding;
   private List<String> featureKeys, contentKeys;
   private int tweetsPerDoc;
+  private boolean processEntities = true;
   
   
   public boolean getOneDocCheckbox() {
@@ -46,6 +49,14 @@ public class PopulationConfig   {
 
   public void setTweetsPerDoc(int tpd) {
     this.tweetsPerDoc = tpd;
+  }
+  
+  public boolean isProcessEntities() {
+    return processEntities;
+  }
+  
+  public void setProcessEntities(boolean entities) {
+    this.processEntities = entities;
   }
   
   public String getEncoding() {
@@ -91,8 +102,9 @@ public class PopulationConfig   {
    * @param cks
    * @param fks
    */
-  public PopulationConfig(int tpd, String encoding, List<String> cks, List<String> fks) {
+  public PopulationConfig(int tpd, boolean entities, String encoding, List<String> cks, List<String> fks) {
     this.tweetsPerDoc = tpd;
+    this.processEntities = entities;
     this.encoding = encoding;
     this.contentKeys = cks;
     this.featureKeys = fks;
@@ -102,6 +114,7 @@ public class PopulationConfig   {
   public void reload(File file) {
     PopulationConfig source = PopulationConfig.load(file);
     this.tweetsPerDoc = source.tweetsPerDoc;
+    this.processEntities = source.processEntities;
     this.encoding = source.encoding;
     this.contentKeys = source.contentKeys;
     this.featureKeys = source.featureKeys;
@@ -110,6 +123,7 @@ public class PopulationConfig   {
   public void reload(URL url) {
     PopulationConfig source = PopulationConfig.load(url);
     this.tweetsPerDoc = source.tweetsPerDoc;
+    this.processEntities = source.processEntities;
     this.encoding = source.encoding;
     this.contentKeys = source.contentKeys;
     this.featureKeys = source.featureKeys;
@@ -143,8 +157,6 @@ public class PopulationConfig   {
 
 
 class LoadConfigListener implements ActionListener {
-  public static final String RESOURCE_CODE = "twitter.population.config";
-
   PopulationDialogWrapper wrapper;
   
   public LoadConfigListener(PopulationDialogWrapper wrapper) {
@@ -153,8 +165,8 @@ class LoadConfigListener implements ActionListener {
 
   @Override
   public void actionPerformed(ActionEvent arg0) {
-    XJFileChooser chooser = MainFrame.getFileChooser();
-    chooser.setResource(RESOURCE_CODE);
+    XJFileChooser chooser = new XJFileChooser();
+    chooser.setResource(PopulationConfig.RESOURCE_CODE);
     chooser.setDialogTitle("Load XML configuration");
     chooser.setFileSelectionMode(XJFileChooser.FILES_ONLY);
     int chosen = chooser.showOpenDialog(this.wrapper.dialog);
@@ -177,6 +189,7 @@ class SaveConfigListener implements ActionListener {
   @Override
   public void actionPerformed(ActionEvent event) {
     XJFileChooser chooser = new XJFileChooser();
+    chooser.setResource(PopulationConfig.RESOURCE_CODE);
     chooser.setDialogTitle("Save configuration as XML");
     chooser.setFileSelectionMode(XJFileChooser.FILES_ONLY);
     int chosen = chooser.showSaveDialog(this.wrapper.dialog);

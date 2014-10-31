@@ -16,6 +16,10 @@ import gate.gui.MainFrame;
 import gate.swing.XJFileChooser;
 import gate.util.ExtensionFileFilter;
 import gate.util.Strings;
+
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -42,7 +46,8 @@ public class PopulationDialogWrapper  {
   protected JDialog dialog;
   protected PopulationConfig config;
   private JTextField encodingField;
-  private JCheckBox checkbox;
+  private JCheckBox oneDocPerTweetCheckbox;
+  private JCheckBox entitiesCheckbox;
   private XJFileChooser chooser;
   private List<URL> fileUrls;
   private ListEditor featureKeysEditor, contentKeysEditor;
@@ -57,39 +62,80 @@ public class PopulationDialogWrapper  {
     dialog = new JDialog(MainFrame.getInstance(), "Populate from Twitter JSON", true);
     MainFrame.getGuiRoots().add(dialog);
     dialog.getContentPane().setLayout(new BoxLayout(dialog.getContentPane(), BoxLayout.Y_AXIS));
-    dialog.add(Box.createVerticalStrut(3));
     
-    Box encodingBox = Box.createHorizontalBox();
-    JLabel encodingLabel = new JLabel("Encoding:");
+    GridBagLayout formLayout = new GridBagLayout();
+    JPanel formPanel = new JPanel(formLayout);
+    GridBagConstraints labelConstraints = new GridBagConstraints();
+    labelConstraints.gridx = 0;
+    labelConstraints.insets = new Insets(3, 3, 0, 3);
+    labelConstraints.anchor = GridBagConstraints.LINE_END;
+    
+    GridBagConstraints componentConstraints = new GridBagConstraints();
+    componentConstraints.gridx = 1;
+    componentConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    componentConstraints.insets = new Insets(3, 3, 0, 3);
+    componentConstraints.anchor = GridBagConstraints.LINE_START;
+    componentConstraints.weightx = 1.0;
+    componentConstraints.fill = GridBagConstraints.HORIZONTAL;
+    
+    
+    JLabel encodingLabel = new JLabel("Encoding");
     encodingField = new JTextField(config.getEncoding());
-    encodingBox.add(encodingLabel);
-    encodingBox.add(encodingField);
-    dialog.add(encodingBox);
+    formLayout.setConstraints(encodingLabel, labelConstraints);
+    formPanel.add(encodingLabel);
+    formLayout.setConstraints(encodingField, componentConstraints);
+    formPanel.add(encodingField);
+
+    // don't need horizontal fill for checkboxes
+    componentConstraints.fill = GridBagConstraints.NONE;
+    
+    JLabel odptCheckboxLabel = new JLabel("One document per tweet");
+    odptCheckboxLabel.setToolTipText("If unchecked, one document per file");
+    oneDocPerTweetCheckbox = new JCheckBox();
+    oneDocPerTweetCheckbox.setToolTipText("If unchecked, one document per file");
+    oneDocPerTweetCheckbox.setSelected(config.getOneDocCheckbox());
+    formLayout.setConstraints(odptCheckboxLabel, labelConstraints);
+    formPanel.add(odptCheckboxLabel);
+    
+    formLayout.setConstraints(oneDocPerTweetCheckbox, componentConstraints);
+    formPanel.add(oneDocPerTweetCheckbox);
+    
+    JLabel entitiesCheckboxLabel = new JLabel("Annotations for \"entities\"");
+    entitiesCheckboxLabel.setToolTipText("Create annotations based on the \"entities\" property of the JSON");
+    entitiesCheckbox = new JCheckBox();
+    entitiesCheckbox.setToolTipText("Create annotations based on the \"entities\" property of the JSON");
+    entitiesCheckbox.setSelected(config.isProcessEntities());
+    formLayout.setConstraints(entitiesCheckboxLabel, labelConstraints);
+    formPanel.add(entitiesCheckboxLabel);
+    
+    formLayout.setConstraints(entitiesCheckbox, componentConstraints);
+    formPanel.add(entitiesCheckbox);
+
+    // restore horizontal fill
+    componentConstraints.fill = GridBagConstraints.HORIZONTAL;
+
+    JLabel contentKeysLabel = new JLabel("Content keys");
+    contentKeysLabel.setToolTipText("JSON key paths to be turned into DocumentContent");    
+    contentKeysEditor = new ListEditor(config.getContentKeys());
+    contentKeysEditor.setToolTipText("JSON key paths to be turned into DocumentContent");
+    formLayout.setConstraints(contentKeysLabel, labelConstraints);
+    formPanel.add(contentKeysLabel);
+    formLayout.setConstraints(contentKeysEditor, componentConstraints);
+    formPanel.add(contentKeysEditor);
+    
+    
+    JLabel featureKeysLabel = new JLabel("Feature keys");
+    featureKeysLabel.setToolTipText("JSON key paths to be turned into Tweet annotation features");    
+    featureKeysEditor = new ListEditor(config.getFeatureKeys());
+    featureKeysEditor.setToolTipText("JSON key paths to be turned into Tweet annotation features");
+    formLayout.setConstraints(featureKeysLabel, labelConstraints);
+    formPanel.add(featureKeysLabel);
+    formLayout.setConstraints(featureKeysEditor, componentConstraints);
+    formPanel.add(featureKeysEditor);
+    
+    dialog.add(formPanel);
     dialog.add(Box.createVerticalStrut(4));
 
-    // Default is now 1 tweet per document; changed in PopulationConfig's
-    // default constructor.
-    Box checkboxBox = Box.createHorizontalBox();
-    checkboxBox.setToolTipText("If unchecked, one document per file");
-    JLabel checkboxLabel = new JLabel("One document per tweet");
-    checkbox = new JCheckBox();
-    checkbox.setSelected(config.getOneDocCheckbox());
-    checkboxBox.add(checkboxLabel);
-    checkboxBox.add(Box.createHorizontalGlue());
-    checkboxBox.add(checkbox);
-    dialog.add(checkboxBox);
-    dialog.add(Box.createVerticalStrut(4));
-    
-    contentKeysEditor = new ListEditor("Content keys: ", config.getContentKeys());
-    contentKeysEditor.setToolTipText("JSON key paths to be turned into DocumentContent");
-    dialog.add(contentKeysEditor);
-    dialog.add(Box.createVerticalStrut(4));
-    
-    featureKeysEditor = new ListEditor("Feature keys: ", config.getFeatureKeys());
-    featureKeysEditor.setToolTipText("JSON key paths to be turned into Tweet annotation features");
-    dialog.add(featureKeysEditor);
-    dialog.add(Box.createVerticalStrut(6));
-    
     Box configPersistenceBox = Box.createHorizontalBox();
     configPersistenceBox.add(Box.createHorizontalGlue());
     JButton loadConfigButton = new JButton("Load configuration");
@@ -129,26 +175,13 @@ public class PopulationDialogWrapper  {
   }
   
   
-  public String getEncoding() {
-    return this.config.getEncoding();
-  }
-  
   public List<URL> getFileUrls() throws MalformedURLException {
     return this.fileUrls;
   }
 
-  public int getTweetsPerDoc() {
-    return this.config.getTweetsPerDoc();
+  public PopulationConfig getConfig() {
+    return this.config;
   }
-  
-  public List<String> getContentKeys() {
-    return this.config.getContentKeys();
-  }
-  
-  public List<String> getFeatureKeys() {
-    return this.config.getFeatureKeys();
-  }
-  
   
   protected void setNewConfig(PopulationConfig newConfig) {
     this.config = newConfig;
@@ -156,7 +189,8 @@ public class PopulationDialogWrapper  {
   }
   
   protected void updateConfig() {
-    this.config.setTweetsPerDoc(this.checkbox.isSelected() ? 1 : 0);
+    this.config.setTweetsPerDoc(this.oneDocPerTweetCheckbox.isSelected() ? 1 : 0);
+    this.config.setProcessEntities(this.entitiesCheckbox.isSelected());
     this.config.setContentKeys(this.contentKeysEditor.getValues());
     this.config.setFeatureKeys(this.featureKeysEditor.getValues());
     this.config.setEncoding(this.encodingField.getText());
@@ -167,7 +201,8 @@ public class PopulationDialogWrapper  {
     this.encodingField.setText(config.getEncoding());
     this.contentKeysEditor.setValues(config.getContentKeys());
     this.featureKeysEditor.setValues(config.getFeatureKeys());
-    this.checkbox.setSelected(config.getOneDocCheckbox());
+    this.oneDocPerTweetCheckbox.setSelected(config.getOneDocCheckbox());
+    this.entitiesCheckbox.setSelected(config.isProcessEntities());
   }
   
   
@@ -224,19 +259,16 @@ class ListEditor extends JPanel {
   private JButton listButton;
   private ListEditorDialog listEditor;
   private List<String> values;
-  private JLabel label;
   private JTextField field;
   
   @Override
   public void setToolTipText(String text) {
     super.setToolTipText(text);
-    label.setToolTipText(text);
     field.setToolTipText(text);
   }
   
   
-  public ListEditor(String labelString, List<String> initialValues) {
-    label = new JLabel(labelString);
+  public ListEditor(List<String> initialValues) {
     field = new JTextField();
     values = initialValues;
     field.setText(Strings.toString(initialValues));
@@ -260,7 +292,6 @@ class ListEditor extends JPanel {
     });
     
     this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
-    this.add(label);
     this.add(field);
     this.add(listButton);
   }

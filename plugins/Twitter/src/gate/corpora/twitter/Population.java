@@ -11,12 +11,10 @@
  */
 package gate.corpora.twitter;
 
-import gate.AnnotationSet;
 import gate.Corpus;
 import gate.Document;
 import gate.DocumentContent;
 import gate.Factory;
-import gate.Gate;
 import gate.corpora.DocumentContentImpl;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.AutoInstance;
@@ -54,7 +52,7 @@ public class Population extends ResourceHelper  {
   public static void populateCorpus(final Corpus corpus, URL inputUrl, PopulationConfig config) 
       throws ResourceInstantiationException {
     populateCorpus(corpus, inputUrl, config.getEncoding(), config.getContentKeys(), 
-        config.getFeatureKeys(), config.getTweetsPerDoc());
+        config.getFeatureKeys(), config.getTweetsPerDoc(), config.isProcessEntities());
   }
   
   /**
@@ -69,14 +67,19 @@ public class Population extends ResourceHelper  {
    */
   public static void populateCorpus(final Corpus corpus, URL inputUrl, String encoding, List<String> contentKeys,
       List<String> featureKeys, int tweetsPerDoc) throws ResourceInstantiationException {
-    
+    populateCorpus(corpus, inputUrl, encoding, contentKeys, featureKeys, tweetsPerDoc, true);
+  }
+
+  public static void populateCorpus(final Corpus corpus, URL inputUrl, String encoding, List<String> contentKeys,
+          List<String> featureKeys, int tweetsPerDoc, boolean processEntities) throws ResourceInstantiationException {
+
     InputStream input = null;
     try {
       input = inputUrl.openStream();
       
       // TODO Detect & handle gzipped input.
       // TODO handling of entities, once there's GUI to control it
-      TweetStreamIterator tweetSource = new TweetStreamIterator(input, contentKeys, featureKeys, false, false);
+      TweetStreamIterator tweetSource = new TweetStreamIterator(input, contentKeys, featureKeys, false, processEntities);
 
       int tweetCounter = 0;
       int tweetDocCounter = 0;
@@ -159,9 +162,8 @@ public class Population extends ResourceHelper  {
     else {    
       DocumentContent contentImpl = new DocumentContentImpl(content.toString());
       document.setContent(contentImpl);
-      AnnotationSet originalMarkups = document.getAnnotations(Gate.ORIGINAL_MARKUPS_ANNOT_SET_NAME);
       for (PreAnnotation preAnn : annotandaOffsets.keySet()) {
-        preAnn.toAnnotation(originalMarkups, annotandaOffsets.get(preAnn));
+        preAnn.toAnnotation(document, annotandaOffsets.get(preAnn));
       }
       corpus.add(document);
       
@@ -200,8 +202,7 @@ public class Population extends ResourceHelper  {
                 public void run() {
                   try {
                     for (URL fileUrl : fileUrls) {
-                      populateCorpus((Corpus) handle.getTarget(), fileUrl, dialog.getEncoding(), 
-                          dialog.getContentKeys(), dialog.getFeatureKeys(), dialog.getTweetsPerDoc());
+                      populateCorpus((Corpus) handle.getTarget(), fileUrl, dialog.getConfig());
                     } 
                   }
                   catch(ResourceInstantiationException e) {

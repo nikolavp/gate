@@ -15,8 +15,10 @@ package gate.corpora.twitter;
 
 import gate.Annotation;
 import gate.AnnotationSet;
+import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
+import gate.GateConstants;
 import gate.util.InvalidOffsetException;
 
 
@@ -28,11 +30,16 @@ import gate.util.InvalidOffsetException;
  */
 public class PreAnnotation  {
   private FeatureMap features;
+  private String asName;
   private String type;
   private long start, end;
   
   
   public PreAnnotation(long start, long end, String type, FeatureMap features) {
+    this(start, end, GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME, type, features);
+  }
+  
+  public PreAnnotation(long start, long end, String asName, String type, FeatureMap features) {
     if (features == null) {
       this.features = Factory.newFeatureMap();
     }
@@ -40,6 +47,7 @@ public class PreAnnotation  {
       this.features = features;
     }
     
+    this.asName = asName;
     this.type = type;
     this.setStart(start);
     this.setEnd(end);
@@ -53,6 +61,9 @@ public class PreAnnotation  {
     this.setEnd(end);
   }
   
+  public Annotation toAnnotation(Document doc, long startOffset) throws InvalidOffsetException {
+    return toAnnotation(doc.getAnnotations(asName), startOffset);
+  }
   
   public Annotation toAnnotation(AnnotationSet outputAS, long startOffset) throws InvalidOffsetException {
     long outputStart = this.start + startOffset;
@@ -76,6 +87,10 @@ public class PreAnnotation  {
 
   public void setFeatures(FeatureMap features) {
     this.features = features;
+  }
+  
+  public String getASName() {
+    return asName;
   }
 
   public String getType() {
