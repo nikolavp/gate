@@ -14,6 +14,7 @@
 package gate.gui;
 
 import gate.Corpus;
+import gate.CorpusExporter;
 import gate.Document;
 import gate.DocumentExporter;
 import gate.Factory;
@@ -117,6 +118,8 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
     Document document =
             (handle.getTarget() instanceof Document ? (Document)handle
                     .getTarget() : null);
+    // are we looking for a file or a directory?
+    boolean singleFile = (document != null) || (de instanceof CorpusExporter);
 
     if(document != null && document.getSourceUrl() != null) {
       String fileName = "";
@@ -171,7 +174,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
       fileChooser.setFileFilter(de.getFileFilter());
       fileChooser.setMultiSelectionEnabled(false);
       fileChooser.setDialogTitle("Save as " + de.getFileType());
-      fileChooser.setFileSelectionMode(document != null
+      fileChooser.setFileSelectionMode(singleFile
               ? JFileChooser.FILES_ONLY
               : JFileChooser.DIRECTORIES_ONLY);
 
@@ -184,7 +187,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
         return null;
       selectedFile = fileChooser.getSelectedFile();
     } else {
-      if(!dialog.show(de, params, document != null, selectedFile != null
+      if(!dialog.show(de, params, singleFile, selectedFile != null
               ? selectedFile.getAbsolutePath()
               : "")) return null;
 
@@ -243,164 +246,182 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
                               + de.getFileType() + " into " + " the file: "
                               + selectedFile.toString() + " in "
                               + ((double)time) / 1000 + "s");
-                    } else {
-                      try {
-                        File dir = selectedFile;
-                        // create the top directory if needed
-                        if(!dir.exists()) {
-                          if(!dir.mkdirs()) {
-                            JOptionPane.showMessageDialog(
-                                    MainFrame.getInstance(),
-                                    "Could not create top directory!", "GATE",
-                                    JOptionPane.ERROR_MESSAGE);
-                            return;
-                          }
+                    } else { // corpus
+                      if(de instanceof CorpusExporter) {
+
+                        long start = System.currentTimeMillis();
+                        listener.statusChanged("Saving as " + de.getFileType()
+                                + " to " + selectedFile.toString() + "...");
+                        try {
+                          ((CorpusExporter)de).export((Corpus)handle.getTarget(), selectedFile,
+                                  options);
+                        } catch(IOException e) {
+                          e.printStackTrace();
                         }
 
-                        MainFrame.lockGUI("Saving...");
-
-                        Corpus corpus = (Corpus)handle.getTarget();
-
-                        // iterate through all the docs and save
-                        // each of
-                        // them
-                        Iterator<Document> docIter = corpus.iterator();
-                        boolean overwriteAll = false;
-                        int docCnt = corpus.size();
-                        int currentDocIndex = 0;
-                        Set<String> usedFileNames = new HashSet<String>();
-                        while(docIter.hasNext()) {
-                          boolean docWasLoaded =
-                                  corpus.isDocumentLoaded(currentDocIndex);
-                          Document currentDoc = docIter.next();
-
-                          URL sourceURL = currentDoc.getSourceUrl();
-                          String fileName = null;
-                          if(sourceURL != null) {
-                            fileName = sourceURL.getPath();
-                            fileName = Files.getLastPathComponent(fileName);
-                          }
-                          if(fileName == null || fileName.length() == 0) {
-                            fileName = currentDoc.getName();
-                          }
-                          // makes sure that the filename does not
-                          // contain
-                          // any
-                          // forbidden character
-                          fileName =
-                                  fileName.replaceAll("[\\/:\\*\\?\"<>|]", "_");
-                          if(fileName.toLowerCase().endsWith(
-                                  "." + de.getDefaultExtension())) {
-                            fileName =
-                                    fileName.substring(0, fileName.length() - 5);
-                          }
-                          if(usedFileNames.contains(fileName)) {
-                            // name clash -> add unique ID
-                            String fileNameBase = fileName;
-                            int uniqId = 0;
-                            fileName = fileNameBase + "-" + uniqId++;
-                            while(usedFileNames.contains(fileName)) {
-                              fileName = fileNameBase + "-" + uniqId++;
+                        long time = System.currentTimeMillis() - start;
+                        listener.statusChanged("Finished saving as "
+                                + de.getFileType() + " into " + " the file: "
+                                + selectedFile.toString() + " in "
+                                + ((double)time) / 1000 + "s");
+                      } else { // not a CorpusExporter
+                        try {
+                          File dir = selectedFile;
+                          // create the top directory if needed
+                          if(!dir.exists()) {
+                            if(!dir.mkdirs()) {
+                              JOptionPane.showMessageDialog(
+                                      MainFrame.getInstance(),
+                                      "Could not create top directory!", "GATE",
+                                      JOptionPane.ERROR_MESSAGE);
+                              return;
                             }
                           }
-                          usedFileNames.add(fileName);
-                          if(!fileName.toLowerCase().endsWith(
-                                  "." + de.getDefaultExtension()))
-                            fileName += "." + de.getDefaultExtension();
-                          File docFile = null;
-                          boolean nameOK = false;
-                          do {
-                            docFile = new File(dir, fileName);
-                            if(docFile.exists() && !overwriteAll) {
-                              // ask the user if we can overwrite
-                              // the file
-                              Object[] opts =
-                                      new Object[] {"Yes", "All", "No",
-                                          "Cancel"};
-                              MainFrame.unlockGUI();
-                              int answer =
-                                      JOptionPane.showOptionDialog(
-                                              MainFrame.getInstance(), "File "
-                                                      + docFile.getName()
-                                                      + " already exists!\n"
-                                                      + "Overwrite?", "GATE",
-                                              JOptionPane.DEFAULT_OPTION,
-                                              JOptionPane.WARNING_MESSAGE,
-                                              null, opts, opts[2]);
-                              MainFrame.lockGUI("Saving...");
-                              switch(answer) {
-                                case 0: {
-                                  nameOK = true;
-                                  break;
-                                }
-                                case 1: {
-                                  nameOK = true;
-                                  overwriteAll = true;
-                                  break;
-                                }
-                                case 2: {
-                                  // user said NO, allow them to
-                                  // provide
-                                  // an
-                                  // alternative name;
-                                  MainFrame.unlockGUI();
-                                  fileName =
-                                          (String)JOptionPane.showInputDialog(
-                                                  MainFrame.getInstance(),
-                                                  "Please provide an alternative file name",
-                                                  "GATE",
-                                                  JOptionPane.QUESTION_MESSAGE,
-                                                  null, null, fileName);
-                                  if(fileName == null) {
+  
+                          MainFrame.lockGUI("Saving...");
+  
+                          Corpus corpus = (Corpus)handle.getTarget();
+  
+                          // iterate through all the docs and save
+                          // each of
+                          // them
+                          Iterator<Document> docIter = corpus.iterator();
+                          boolean overwriteAll = false;
+                          int docCnt = corpus.size();
+                          int currentDocIndex = 0;
+                          Set<String> usedFileNames = new HashSet<String>();
+                          while(docIter.hasNext()) {
+                            boolean docWasLoaded =
+                                    corpus.isDocumentLoaded(currentDocIndex);
+                            Document currentDoc = docIter.next();
+  
+                            URL sourceURL = currentDoc.getSourceUrl();
+                            String fileName = null;
+                            if(sourceURL != null) {
+                              fileName = sourceURL.getPath();
+                              fileName = Files.getLastPathComponent(fileName);
+                            }
+                            if(fileName == null || fileName.length() == 0) {
+                              fileName = currentDoc.getName();
+                            }
+                            // makes sure that the filename does not
+                            // contain
+                            // any
+                            // forbidden character
+                            fileName =
+                                    fileName.replaceAll("[\\/:\\*\\?\"<>|]", "_");
+                            if(fileName.toLowerCase().endsWith(
+                                    "." + de.getDefaultExtension())) {
+                              fileName =
+                                      fileName.substring(0, fileName.length() - 5);
+                            }
+                            if(usedFileNames.contains(fileName)) {
+                              // name clash -> add unique ID
+                              String fileNameBase = fileName;
+                              int uniqId = 0;
+                              fileName = fileNameBase + "-" + uniqId++;
+                              while(usedFileNames.contains(fileName)) {
+                                fileName = fileNameBase + "-" + uniqId++;
+                              }
+                            }
+                            usedFileNames.add(fileName);
+                            if(!fileName.toLowerCase().endsWith(
+                                    "." + de.getDefaultExtension()))
+                              fileName += "." + de.getDefaultExtension();
+                            File docFile = null;
+                            boolean nameOK = false;
+                            do {
+                              docFile = new File(dir, fileName);
+                              if(docFile.exists() && !overwriteAll) {
+                                // ask the user if we can overwrite
+                                // the file
+                                Object[] opts =
+                                        new Object[] {"Yes", "All", "No",
+                                            "Cancel"};
+                                MainFrame.unlockGUI();
+                                int answer =
+                                        JOptionPane.showOptionDialog(
+                                                MainFrame.getInstance(), "File "
+                                                        + docFile.getName()
+                                                        + " already exists!\n"
+                                                        + "Overwrite?", "GATE",
+                                                JOptionPane.DEFAULT_OPTION,
+                                                JOptionPane.WARNING_MESSAGE,
+                                                null, opts, opts[2]);
+                                MainFrame.lockGUI("Saving...");
+                                switch(answer) {
+                                  case 0: {
+                                    nameOK = true;
+                                    break;
+                                  }
+                                  case 1: {
+                                    nameOK = true;
+                                    overwriteAll = true;
+                                    break;
+                                  }
+                                  case 2: {
+                                    // user said NO, allow them to
+                                    // provide
+                                    // an
+                                    // alternative name;
+                                    MainFrame.unlockGUI();
+                                    fileName =
+                                            (String)JOptionPane.showInputDialog(
+                                                    MainFrame.getInstance(),
+                                                    "Please provide an alternative file name",
+                                                    "GATE",
+                                                    JOptionPane.QUESTION_MESSAGE,
+                                                    null, null, fileName);
+                                    if(fileName == null) {
+                                      handle.processFinished();
+                                      return;
+                                    }
+                                    MainFrame.lockGUI("Saving");
+                                    break;
+                                  }
+                                  case 3: {
+                                    // user gave up; return
                                     handle.processFinished();
                                     return;
                                   }
-                                  MainFrame.lockGUI("Saving");
-                                  break;
                                 }
-                                case 3: {
-                                  // user gave up; return
-                                  handle.processFinished();
-                                  return;
-                                }
+  
+                              } else {
+                                nameOK = true;
                               }
-
-                            } else {
-                              nameOK = true;
+                            } while(!nameOK);
+                            // save the file
+                            try {
+                              // do the actual exporting
+                              de.export(currentDoc, docFile, options);
+                            } catch(Exception ioe) {
+                              MainFrame.unlockGUI();
+                              JOptionPane.showMessageDialog(
+                                      MainFrame.getInstance(),
+                                      "Could not create write file:"
+                                              + ioe.toString(), "GATE",
+                                      JOptionPane.ERROR_MESSAGE);
+                              ioe.printStackTrace(Err.getPrintWriter());
+                              return;
                             }
-                          } while(!nameOK);
-                          // save the file
-                          try {
-                            // do the actual exporting
-                            de.export(currentDoc, docFile, options);
-                          } catch(Exception ioe) {
-                            MainFrame.unlockGUI();
-                            JOptionPane.showMessageDialog(
-                                    MainFrame.getInstance(),
-                                    "Could not create write file:"
-                                            + ioe.toString(), "GATE",
-                                    JOptionPane.ERROR_MESSAGE);
-                            ioe.printStackTrace(Err.getPrintWriter());
-                            return;
-                          }
-
-                          listener.statusChanged(currentDoc.getName()
-                                  + " saved");
-                          // close the doc if it wasn't already
-                          // loaded
-                          if(!docWasLoaded) {
-                            corpus.unloadDocument(currentDoc);
-                            Factory.deleteResource(currentDoc);
-                          }
-
-                          handle.progressChanged(100 * currentDocIndex++
-                                  / docCnt);
-                        }// while(docIter.hasNext())
-                        listener.statusChanged("Corpus Saved");
-                        handle.processFinished();
-
-                      } finally {
-                        MainFrame.unlockGUI();
+  
+                            listener.statusChanged(currentDoc.getName()
+                                    + " saved");
+                            // close the doc if it wasn't already
+                            // loaded
+                            if(!docWasLoaded) {
+                              corpus.unloadDocument(currentDoc);
+                              Factory.deleteResource(currentDoc);
+                            }
+  
+                            handle.progressChanged(100 * currentDocIndex++
+                                    / docCnt);
+                          }// while(docIter.hasNext())
+                          listener.statusChanged("Corpus Saved");
+                          handle.processFinished();
+                        } finally {
+                          MainFrame.unlockGUI();
+                        }
                       }
                     }
                   }
@@ -492,7 +513,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
 
     private ResourceParametersEditor parametersEditor;
 
-    private boolean isDocument, userCanceled;
+    private boolean singleFile, userCanceled;
 
     public DocumentExportDialog() {
       super(MainFrame.getInstance(), "Save As...", true);
@@ -554,7 +575,7 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
           fileChooser.setFileFilter(de.getFileFilter());
           fileChooser.setMultiSelectionEnabled(false);
           fileChooser.setDialogTitle("Save as " + de.getFileType());
-          fileChooser.setFileSelectionMode(isDocument
+          fileChooser.setFileSelectionMode(singleFile
                   ? JFileChooser.FILES_ONLY
                   : JFileChooser.DIRECTORIES_ONLY);
 
@@ -620,9 +641,9 @@ public class DocumentExportMenu extends XJMenu implements CreoleListener {
     }
 
     public synchronized boolean show(DocumentExporter de,
-            List<List<Parameter>> params, boolean isDocument, String filePath) {
+            List<List<Parameter>> params, boolean singleFile, String filePath) {
 
-      this.isDocument = isDocument;
+      this.singleFile = singleFile;
       this.de = de;
 
       setTitle("Save as " + de.getFileType());
