@@ -179,6 +179,8 @@ public class Normaliser extends AbstractLanguageAnalyser {
           // second param true means take keyboard distances into account
           String mostSimilar = checker.findMostSimilar(initialText);
 
+          System.out.println(initialText + ":" + mostSimilar);
+
           if(mostSimilar != null) {
 
             // if most similar distance is below threshold, make the
@@ -186,7 +188,7 @@ public class Normaliser extends AbstractLanguageAnalyser {
             if(dist.modifiedLevenshteinDistance(initialText, mostSimilar) < maxDistance) {
               // don't bother just changing case - leave case as it is
               if(!initialText.toLowerCase()
-                .equals(normalisedText.toLowerCase())) {
+                .equals(mostSimilar.toLowerCase())) {
                 normalisedText = mostSimilar;
               }
             }
