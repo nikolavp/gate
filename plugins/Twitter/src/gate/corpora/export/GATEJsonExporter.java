@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -191,7 +192,7 @@ public class GATEJsonExporter extends CorpusExporter {
       boolean includeText = (options.containsKey("includeText")
               ? ((Boolean)options.get("includeText")).booleanValue() : true);
 
-      Map<String,Collection<Annotation>> annotationsMap = new HashMap<>();
+      Map<String,Collection<Annotation>> annotationsMap = new LinkedHashMap<>();
       
       for (String type : types) {
         String[] setAndType = type.split(":", 2);
@@ -210,14 +211,18 @@ public class GATEJsonExporter extends CorpusExporter {
       }
       if(docAnnots == null || docAnnots.isEmpty()) {
         // no document annotations, write everything
-        DocumentJsonUtils.writeDocument(doc, 0L, Utils.end(doc), annotationsMap, null, null, includeText, generator);
+        Map<String, Collection<Annotation>> sortedAnnots = new LinkedHashMap<>();
+        for(Map.Entry<String, Collection<Annotation>> entry : annotationsMap.entrySet()) {
+          sortedAnnots.put(entry.getKey(), Utils.inDocumentOrder((AnnotationSet)entry.getValue()));
+        }
+        DocumentJsonUtils.writeDocument(doc, 0L, Utils.end(doc), sortedAnnots, null, null, includeText, generator);
       } else {
         for(Annotation docAnnot : Utils.inDocumentOrder(docAnnots)) {
           Map<String, Collection<Annotation>> coveredAnnotations = new HashMap<>();
           for(Map.Entry<String, Collection<Annotation>> entry : annotationsMap.entrySet()) {
             coveredAnnotations.put(entry.getKey(),
-                    ((AnnotationSet)entry.getValue()).getContained(
-                            Utils.start(docAnnot), Utils.end(docAnnot)));
+                    Utils.inDocumentOrder(((AnnotationSet)entry.getValue()).getContained(
+                            Utils.start(docAnnot), Utils.end(docAnnot))));
           }
           DocumentJsonUtils.writeDocument(doc, Utils.start(docAnnot), Utils.end(docAnnot),
                   coveredAnnotations, docAnnot.getFeatures(), null, includeText, generator);
