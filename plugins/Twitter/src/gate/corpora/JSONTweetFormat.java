@@ -24,6 +24,8 @@ import gate.creole.metadata.AutoInstance;
 import gate.creole.metadata.CreoleResource;
 import gate.util.DocumentFormatException;
 import gate.util.InvalidOffsetException;
+import gate.util.Out;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -117,11 +119,23 @@ public class JSONTweetFormat extends TextualDocumentFormat {
         }
       }
     }
-    catch (InvalidOffsetException e) {
-      throw new DocumentFormatException(e);
-    } 
-    catch(IOException e) {
-      throw new DocumentFormatException(e);
+    catch (InvalidOffsetException | IOException e) {
+      doc.getFeatures().put("parsingError", Boolean.TRUE);
+
+      Boolean bThrow =
+              (Boolean)doc.getFeatures().get(
+                      GateConstants.THROWEX_FORMAT_PROPERTY_NAME);
+
+      if(bThrow != null && bThrow.booleanValue()) {
+        // the next line is commented to avoid Document creation fail on
+        // error
+        throw new DocumentFormatException(e);
+      }
+      else {
+        Out.println("Warning: Document remains unparsed. \n"
+                + "\n  Stack Dump: ");
+        e.printStackTrace(Out.getPrintWriter());
+      } // if
     }
   }
 
