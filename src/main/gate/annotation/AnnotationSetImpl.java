@@ -862,7 +862,10 @@ public class AnnotationSetImpl extends AbstractSet<Annotation> implements
   private final Node[] getNodes(Long start, Long end) throws InvalidOffsetException
   {
     // are the offsets valid?
-    if(!doc.isValidOffsetRange(start, end)) throw new InvalidOffsetException();
+    if(!doc.isValidOffsetRange(start, end)) {
+      throw new InvalidOffsetException("Offsets [" + start + ":" + end +
+              "] not valid for this document of size " + doc.getContent().size());
+    }
     // the set has to be indexed by position in order to add, as we need
     // to find out if nodes need creating or if they exist already
     if(nodesByOffset == null) {
