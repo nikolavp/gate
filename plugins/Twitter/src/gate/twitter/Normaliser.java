@@ -179,7 +179,7 @@ public class Normaliser extends AbstractLanguageAnalyser {
           // second param true means take keyboard distances into account
           String mostSimilar = checker.findMostSimilar(initialText);
 
-          System.out.println(initialText + ":" + mostSimilar);
+          // System.out.println(initialText + ":" + mostSimilar);
 
           if(mostSimilar != null) {
 
