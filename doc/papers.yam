@@ -16,6 +16,10 @@ GATE papers
 
 - V. Tablan, I. Roberts, H. Cunningham, and K. Bontcheva. GATECloud.net: a Platform for Large-Scale, Open-Source Text Processing on the Cloud. %(http://rsta.royalsocietypublishing.org/, Philosophical Transactions of the Royal Society A), 371(1983), 2013 %(http://dx.doi.org/10.1098/rsta.2012.0071, doi:10.1098/rsta.2012.0071). %(http://gate.ac.uk/sale/ahm11/journal/revised-sumission-preprint.pdf, A pre-print).
 
+%3* I used %(https://gate.ac.uk/mimir, GATE Mímir):
+
+- V. Tablan, K. Bontcheva, I. Roberts, and H. Cunningham. Mímir: An open-source semantic search framework for interactive information seeking and discovery. Journal of Web Semantics: Science, Services and Agents on the World Wide Web, 2014. %(http://dx.doi.org/10.1016/j.websem.2014.10.002, doi:10.1016/j.websem.2014.10.002). %(bibtex.html#Tablan2014, BibTeX).
+
 %3* I used GATE Teamware:
 
 - K. Bontcheva, H. Cunningham, I. Roberts, A. Roberts, V. Tablan, N. Aswani, G. Gorrell. Teamware: A Web-based, Collaborative Text Annotation Framework.  Language Resources and Evaluation. Volume 47, Issue 4, December 2013. %(http://link.springer.com/article/10.1007/s10579-013-9215-6,PDF)
@@ -45,8 +49,9 @@ GATE papers
 
 %1 Book Chapters, Journals and Conference papers
 
-%2* Forthcoming
+%2* Forthcoming / Accepted
 
+- V. Tablan, K. Bontcheva, I. Roberts, and H. Cunningham. Mímir: An open-source semantic search framework for interactive information seeking and discovery. Journal of Web Semantics: Science, Services and Agents on the World Wide Web, 2014. %(http://dx.doi.org/10.1016/j.websem.2014.10.002, doi:10.1016/j.websem.2014.10.002)%footnote(Published online but not yet assigned to a specific volume and issue.)
 
 - K. Bontcheva, L. Derczynski, I. Roberts. Crowdsourcing Named Entity Recognition and Entity Linking Corpora. In Nancy Ide and James Pustejovsky, eds.: The Handbook of Linguistic Annotation.
 
