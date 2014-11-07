@@ -229,7 +229,7 @@ public class DocumentJsonUtils {
   public static void writeDocument(Document doc, Long start, Long end,
           Map<String, Collection<Annotation>> annotationsMap, JsonGenerator json)
           throws JsonGenerationException, IOException, InvalidOffsetException {
-    writeDocument(doc, start, end, annotationsMap, null, null, true, json);
+    writeDocument(doc, start, end, annotationsMap, null, null, json);
   }
 
   /**
@@ -259,7 +259,7 @@ public class DocumentJsonUtils {
           Map<String, Collection<Annotation>> annotationsMap,
           Map<?, ?> extraFeatures, JsonGenerator json)
           throws JsonGenerationException, IOException, InvalidOffsetException {
-    writeDocument(doc, start, end, annotationsMap, extraFeatures, null, true, json);
+    writeDocument(doc, start, end, annotationsMap, extraFeatures, null, json);
   }
 
   /**
@@ -292,49 +292,11 @@ public class DocumentJsonUtils {
           Map<?, ?> extraFeatures, String annotationTypeProperty,
           JsonGenerator json) throws JsonGenerationException, IOException,
           InvalidOffsetException {
-    writeDocument(doc, start, end, annotationsMap, extraFeatures,
-            annotationTypeProperty, true, json);
-  }
-
-  /**
-   * Write a substring of a GATE document to the specified
-   * JsonGenerator. The specified window of document text will
-   * optionally be written as a property named "text" and the specified
-   * annotations will be written as "entities", with their offsets
-   * adjusted to be relative to the specified window.
-   * 
-   * @param doc the document to write
-   * @param start the start offset of the segment to write
-   * @param end the end offset of the segment to write
-   * @param extraFeatures additional properties to add to the generated
-   *          JSON. If the map includes a "text" key this will be
-   *          ignored, and if it contains a key "entities" whose value
-   *          is a map then these entities will be merged with the
-   *          generated ones derived from the annotationsMap. This would
-   *          typically be used for documents that were originally
-   *          derived from Twitter data, to re-create the original JSON.
-   * @param annotationTypeProperty if non-null, the annotation type will
-   *          be written as a property under this name, as if it were an
-   *          additional feature of each annotation.
-   * @param includeText should the "text" property be included?
-   * @param json the {@link JsonGenerator} to write to.
-   * @throws JsonGenerationException if a problem occurs while
-   *           generating the JSON
-   * @throws IOException if an I/O error occurs.
-   */
-  public static void writeDocument(Document doc, Long start, Long end,
-          Map<String, Collection<Annotation>> annotationsMap,
-          Map<?, ?> extraFeatures, String annotationTypeProperty,
-          boolean includeText, JsonGenerator json) throws JsonGenerationException, IOException,
-          InvalidOffsetException {
-
     ObjectWriter writer = MAPPER.writer();
 
     json.writeStartObject();
-    if(includeText) {
-      json.writeStringField("text", doc.getContent().getContent(start, end)
-              .toString());
-    }
+    json.writeStringField("text", doc.getContent().getContent(start, end)
+            .toString());
     json.writeFieldName("entities");
     json.writeStartObject();
     // if the extraFeatures already includes entities, merge them with

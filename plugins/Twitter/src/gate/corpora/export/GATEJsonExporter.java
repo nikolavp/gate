@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -90,16 +89,6 @@ public class GATEJsonExporter extends CorpusExporter {
    * No-op, exists only as a host for the parameter annotations.
    */
   @RunTime
-  @CreoleParameter(defaultValue = "true", comment = "Whether " +
-  		"to include the document text as a \"text\" property in " +
-  		"the output JSON")
-  public void setIncludeText(Boolean include) {}
-  public Boolean getIncludeText() { return null; }
-  
-  /**
-   * No-op, exists only as a host for the parameter annotations.
-   */
-  @RunTime
   @Optional
   @CreoleParameter(defaultValue = GateConstants.ORIGINAL_MARKUPS_ANNOT_SET_NAME,
           comment = "Annotation set in which the \"document " +
@@ -129,7 +118,6 @@ public class GATEJsonExporter extends CorpusExporter {
     super("GATE JSON", "json","application/json");
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void export(Document doc, OutputStream out, FeatureMap options)
     throws IOException {
@@ -187,11 +175,9 @@ public class GATEJsonExporter extends CorpusExporter {
       AnnotationSet defaultEntitiesAS =
         doc.getAnnotations((String)options.get("entitiesAnnotationSetName"));
       
+      @SuppressWarnings("unchecked")
       Collection<String> types = (Collection<String>)options.get("annotationTypes");
       
-      boolean includeText = (options.containsKey("includeText")
-              ? ((Boolean)options.get("includeText")).booleanValue() : true);
-
       Map<String,Collection<Annotation>> annotationsMap = new LinkedHashMap<>();
       
       for (String type : types) {
@@ -215,7 +201,7 @@ public class GATEJsonExporter extends CorpusExporter {
         for(Map.Entry<String, Collection<Annotation>> entry : annotationsMap.entrySet()) {
           sortedAnnots.put(entry.getKey(), Utils.inDocumentOrder((AnnotationSet)entry.getValue()));
         }
-        DocumentJsonUtils.writeDocument(doc, 0L, Utils.end(doc), sortedAnnots, null, null, includeText, generator);
+        DocumentJsonUtils.writeDocument(doc, 0L, Utils.end(doc), sortedAnnots, null, null, generator);
       } else {
         for(Annotation docAnnot : Utils.inDocumentOrder(docAnnots)) {
           Map<String, Collection<Annotation>> coveredAnnotations = new HashMap<>();
@@ -225,7 +211,7 @@ public class GATEJsonExporter extends CorpusExporter {
                             Utils.start(docAnnot), Utils.end(docAnnot))));
           }
           DocumentJsonUtils.writeDocument(doc, Utils.start(docAnnot), Utils.end(docAnnot),
-                  coveredAnnotations, docAnnot.getFeatures(), null, includeText, generator);
+                  coveredAnnotations, docAnnot.getFeatures(), null, generator);
         }
       }
     } catch(InvalidOffsetException e) {
