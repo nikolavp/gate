@@ -22,6 +22,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -295,8 +297,10 @@ public class DocumentJsonUtils {
     ObjectWriter writer = MAPPER.writer();
 
     json.writeStartObject();
-    json.writeStringField("text", doc.getContent().getContent(start, end)
-            .toString());
+    RepositioningInfo repos = new RepositioningInfo();
+    String text = escape(doc.getContent().getContent(start, end)
+            .toString(), repos);
+    json.writeStringField("text", text);
     json.writeFieldName("entities");
     json.writeStartObject();
     // if the extraFeatures already includes entities, merge them with
@@ -318,8 +322,8 @@ public class DocumentJsonUtils {
         // indices:[start, end], corrected to match the sub-range of
         // text we're writing
         json.writeArrayFieldStart("indices");
-        json.writeNumber(a.getStartNode().getOffset() - start);
-        json.writeNumber(a.getEndNode().getOffset() - start);
+        json.writeNumber(repos.getOriginalPos(a.getStartNode().getOffset() - start));
+        json.writeNumber(repos.getOriginalPos(a.getEndNode().getOffset() - start));
         json.writeEndArray(); // end of indices
         if(annotationTypeProperty != null) {
           json.writeStringField(annotationTypeProperty, a.getType());
@@ -377,5 +381,44 @@ public class DocumentJsonUtils {
     // object. This occurs even if you flush the OutputStream instance
     // as the data never leaves the JsonGenerator
     json.flush();
+  }
+
+  private static final Pattern CHARS_TO_ESCAPE = Pattern.compile("[<>&]");
+  
+  /**
+   * Escape all angle brackets and ampersands in the given string,
+   * recording the adjustments to character offsets within the
+   * given {@link RepositioningInfo}.
+   */
+  private static String escape(String str, RepositioningInfo repos) {
+    StringBuffer buf = new StringBuffer();
+    int correction = 0;
+    int lastMatchEnd = 0;
+    Matcher mat = CHARS_TO_ESCAPE.matcher(str);
+    while(mat.find()) {
+      if(mat.start() != lastMatchEnd) {
+        // repositioning record for the span from end of previous match to start of this one
+        int nonMatchLen = mat.start() - lastMatchEnd;
+        repos.addPositionInfo(lastMatchEnd + correction, nonMatchLen, lastMatchEnd, nonMatchLen);
+      }
+      String replace = "?";
+      switch(mat.group()) {
+        case "&": replace = "&amp;"; break;
+        case ">": replace = "&gt;"; break;
+        case "<": replace = "&lt;"; break;
+      }
+      // repositioning record covering this match
+      repos.addPositionInfo(mat.start() + correction, replace.length(), mat.start(), 1);
+      correction += replace.length() - 1;
+      mat.appendReplacement(buf, replace);
+      lastMatchEnd = mat.end();
+    }
+    int tailLen = str.length() - lastMatchEnd;
+    if(tailLen > 0) {
+      // repositioning record covering everything after the last match
+      repos.addPositionInfo(lastMatchEnd + correction, tailLen, lastMatchEnd, tailLen);
+    }
+    mat.appendTail(buf);
+    return buf.toString();
   }
 }
