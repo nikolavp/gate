@@ -13,6 +13,7 @@ package gate.corpora.twitter;
 
 import gate.Factory;
 import gate.FeatureMap;
+import gate.corpora.RepositioningInfo;
 import gate.util.Strings;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,6 +21,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -80,10 +84,12 @@ public class Tweet {
       String key = keys.next();
 
       if (key.equals(TweetUtils.DEFAULT_TEXT_ATTRIBUTE)) {
-        string = StringEscapeUtils.unescapeHtml(json.get(key).asText());
-        processEntities(json, 0L);
-      }
-      else {
+        RepositioningInfo repos = new RepositioningInfo();
+        string = unescape(json.get(key).asText(), repos);
+        if(handleEntities) processEntities(json, 0L, repos);
+      } else if(key.equals("entities") && handleEntities) {
+        // do nothing - don't add entities as a feature
+      } else {
         features.put(key.toString(), TweetUtils.process(json.get(key)));
       }
     }
@@ -112,11 +118,17 @@ public class Tweet {
       if (featuresFound.containsKey(cKey)) {
         int start = content.length();
         // Use GATE's String conversion in case there are maps or lists.
-        content.append(Strings.toString(featuresFound.get(cKey)));
+        String str = Strings.toString(featuresFound.get(cKey));
+        RepositioningInfo repos = null;
+        if(TweetUtils.DEFAULT_TEXT_ATTRIBUTE.equals(cKey)) {
+          repos = new RepositioningInfo();
+          str = unescape(str, repos);
+        }
+        content.append(str);
         this.annotations.add(new PreAnnotation(start, content.length(), cKey));
         if(handleEntities && TweetUtils.DEFAULT_TEXT_ATTRIBUTE.equals(cKey)) {
           // only process entities within "text"
-          processEntities(json, start);
+          processEntities(json, start, repos);
         }
         content.append('\n');
       }
@@ -134,6 +146,47 @@ public class Tweet {
     this.annotations.add(new PreAnnotation(0, content.length(), TweetUtils.TWEET_ANNOTATION_TYPE, annoFeatures));
     this.string = content.toString();
   }
+  
+  private static Pattern XML_ENTITY_PATTERN = Pattern.compile("&(amp|lt|gt);");
+  
+  /**
+   * Un-escape &amp;amp;, &amp;gt; and &amp;lt; in the given string, populating
+   * the supplied {@link RepositioningInfo} to describe the offset changes.
+   * @param str string, possibly including escaped ampersands or angle brackets
+   * @param repos {@link RepositioningInfo} to hold offset changes
+   * @return the unescaped string
+   */
+  private String unescape(String str, RepositioningInfo repos) {
+    StringBuffer buf = new StringBuffer();
+    int correction = 0;
+    int lastMatchEnd = 0;
+    Matcher mat = XML_ENTITY_PATTERN.matcher(str);
+    while(mat.find()) {
+      if(mat.start() != lastMatchEnd) {
+        // repositioning record for the span from end of previous match to start of this one
+        int nonMatchLen = mat.start() - lastMatchEnd;
+        repos.addPositionInfo(lastMatchEnd, nonMatchLen, lastMatchEnd - correction, nonMatchLen);
+      }
+      // repositioning record covering this match
+      repos.addPositionInfo(mat.start(), mat.end() - mat.start(), mat.start() - correction, 1);
+      correction += mat.end() - mat.start() - 1;
+      String replace = "?";
+      switch(mat.group(1)) {
+        case "amp": replace = "&"; break;
+        case "gt": replace = ">"; break;
+        case "lt": replace = "<"; break;
+      }
+      mat.appendReplacement(buf, replace);
+      lastMatchEnd = mat.end();
+    }
+    int tailLen = str.length() - lastMatchEnd;
+    if(tailLen > 0) {
+      // repositioning record covering everything after the last match
+      repos.addPositionInfo(lastMatchEnd, tailLen, lastMatchEnd - correction, tailLen);
+    }
+    mat.appendTail(buf);
+    return buf.toString();
+  }
 
   /**
    * Process the "entities" property of this json object into annotations,
@@ -143,7 +196,7 @@ public class Tweet {
    * @param startOffset offset correction if the text is not the first of
    *         the content keys.
    */
-  private void processEntities(JsonNode json, long startOffset) {
+  private void processEntities(JsonNode json, long startOffset, RepositioningInfo repos) {
     JsonNode entitiesNode = json.get(TweetUtils.ENTITIES_ATTRIBUTE);
     if(entitiesNode == null || !entitiesNode.isObject()) {
       // no entities, nothing to do
@@ -168,8 +221,8 @@ public class Tweet {
               if(indicesList.get(0) instanceof Number && indicesList.get(1) instanceof Number) {
                 // finally we know we have a valid entity
                 features.remove("indices");
-                long annStart = startOffset + ((Number)indicesList.get(0)).longValue();
-                long annEnd = startOffset + ((Number)indicesList.get(1)).longValue();
+                long annStart = repos.getExtractedPos(startOffset + ((Number)indicesList.get(0)).longValue());
+                long annEnd = repos.getExtractedPos(startOffset + ((Number)indicesList.get(1)).longValue());
                 if(setAndType.length == 2) {
                   // explicit annotation set name
                   annotations.add(new PreAnnotation(annStart, annEnd, setAndType[0], setAndType[1], features));
