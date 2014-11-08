@@ -124,11 +124,21 @@ public class TweetUtils  {
     if (node.isBoolean()) {
       return node.asBoolean();
     }
-    if (node.isDouble()) {
-      return node.asDouble();
+    if (node.isIntegralNumber()) {
+      // use Long even if the number is representable as an Integer,
+      // since Long is better supported in JAPE etc.
+      if(node.canConvertToLong()) {
+        return node.asLong();
+      } else {
+        return node.bigIntegerValue();
+      }
     }
-    if (node.isInt()) {
-      return node.asInt();
+    if (node.isNumber()) {
+      // fractional number, as integers would have been caught by
+      // the previous test.  The numberValue will be a Double
+      // unless the parser was specifically configured to use
+      // BigDecimal instead
+      return node.numberValue();
     }
     if (node.isTextual()) {
       return node.asText();
