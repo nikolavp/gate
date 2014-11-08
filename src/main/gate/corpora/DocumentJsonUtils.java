@@ -322,8 +322,8 @@ public class DocumentJsonUtils {
         // indices:[start, end], corrected to match the sub-range of
         // text we're writing
         json.writeArrayFieldStart("indices");
-        json.writeNumber(repos.getOriginalPos(a.getStartNode().getOffset() - start));
-        json.writeNumber(repos.getOriginalPos(a.getEndNode().getOffset() - start));
+        json.writeNumber(repos.getOriginalPos(a.getStartNode().getOffset() - start, true));
+        json.writeNumber(repos.getOriginalPos(a.getEndNode().getOffset() - start, false));
         json.writeEndArray(); // end of indices
         if(annotationTypeProperty != null) {
           json.writeStringField(annotationTypeProperty, a.getType());
@@ -416,7 +416,7 @@ public class DocumentJsonUtils {
     int tailLen = str.length() - lastMatchEnd;
     if(tailLen > 0) {
       // repositioning record covering everything after the last match
-      repos.addPositionInfo(lastMatchEnd + correction, tailLen, lastMatchEnd, tailLen);
+      repos.addPositionInfo(lastMatchEnd + correction, tailLen + 1, lastMatchEnd, tailLen + 1);
     }
     mat.appendTail(buf);
     return buf.toString();
