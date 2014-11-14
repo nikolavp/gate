@@ -224,7 +224,12 @@ public class MajorityVoteClassificationConsensus
           }
 
           // construct replacement "options" structure containing only
-          // the options that were used in the judgments set
+          // the options that were used in the judgments set. We have to
+          // take care to (a) only include options that were in the
+          // original "options" feature, and not judgments that picked
+          // one of the task-wide common options, and (b) do our best to
+          // keep the options in the same order as they were in the
+          // original entity.
           Object origOptions = origEntity.getFeatures().get("options");
           try {
             if(origOptions instanceof Collection<?>) {
