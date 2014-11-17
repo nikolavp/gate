@@ -68,6 +68,8 @@ public class EntityAnnotationResultsImporter
   
   private String tokenASName;
   
+  private Boolean annotateSpans;
+  
   protected CrowdFlowerClient crowdFlowerClient;
 
   public String getApiKey() {
@@ -155,6 +157,18 @@ public class EntityAnnotationResultsImporter
     this.tokenASName = tokenASName;
   }
 
+  public Boolean getAnnotateSpans() {
+    return annotateSpans;
+  }
+
+  @RunTime
+  @CreoleParameter(comment = "If true (the default), create one annotation for " +
+  		"each contiguous run of marked tokens, if false, annotate each token " +
+  		"separately.", defaultValue = "true")
+  public void setAnnotateSpans(Boolean annotateSpans) {
+    this.annotateSpans = annotateSpans;
+  }
+
   @Override
   public Resource init() throws ResourceInstantiationException {
     if(apiKey == null || "".equals(apiKey)) {
@@ -224,11 +238,12 @@ public class EntityAnnotationResultsImporter
                 int startTok = 0;
                 int curTok = startTok;
                 while(curTok < answer.size()) {
-                  // we've reached the end of a consecutive sequence if either
-                  // (a) we're on the last element of answer or
-                  // (b) the next element is not this+1
-                  if(curTok == answer.size() - 1
-                          || answer.get(curTok).getAsInt() != answer.get(curTok + 1).getAsInt()) {
+                  // we've reached the end of an annotation if either
+                  // (a) we want to annotate each token individually anyway or 
+                  // (b) we're on the last element of answer or
+                  // (c) the next element is not this+1
+                  if(!annotateSpans || curTok == answer.size() - 1
+                          || (answer.get(curTok).getAsInt() + 1) != answer.get(curTok + 1).getAsInt()) {
                     Long startOffset = snippetTokens.get(answer.get(startTok).getAsInt()).getStartNode().getOffset();
                     Long endOffset = snippetTokens.get(answer.get(curTok).getAsInt()).getEndNode().getOffset();
                     startTok = curTok + 1;
