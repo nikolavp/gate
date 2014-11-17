@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @CreoleResource(name = "Majority-vote consensus builder (classification)", comment = "Process results of a crowd annotation task to find "
-        + "where annotators agree and disagree.", helpURL = "http://gate.ac.uk/userguide/sec:crowd:classification")
+        + "where annotators agree and disagree.", helpURL = "http://gate.ac.uk/userguide/sec:crowd:classification:adjudication")
 public class MajorityVoteClassificationConsensus
                                                 extends
                                                   AbstractLanguageAnalyser {

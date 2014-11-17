@@ -29,7 +29,7 @@ import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 
 @CreoleResource(name = "Majority-vote consensus builder (annotation)", comment = "Process results of a crowd annotation task to find "
-        + "where annotators agree and disagree.", helpURL = "http://gate.ac.uk/userguide/sec:crowd:annotation")
+        + "where annotators agree and disagree.", helpURL = "http://gate.ac.uk/userguide/sec:crowd:annotation:adjudication")
 public class MajorityVoteAnnotationConsensus extends AbstractLanguageAnalyser {
 
   private static final long serialVersionUID = -983107328639648414L;
