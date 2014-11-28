@@ -486,9 +486,9 @@ public class GazetteerEditor extends AbstractVisualResource
 //        timer.schedule(timerTask, timeToRun);
 //      }
 //    });
-    listTopPanel.add(caseInsensitiveCheckBox = new JCheckBox("Case Ins."));
+    listTopPanel.add(caseInsensitiveCheckBox = new JCheckBox("Match Case"));
     caseInsensitiveCheckBox.setSelected(true);
-    caseInsensitiveCheckBox.setToolTipText("Case Insensitive");
+    caseInsensitiveCheckBox.setToolTipText("Match Case");
     caseInsensitiveCheckBox.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
